@@ -1,0 +1,139 @@
+{
+  "processing_timestamp": "2025-07-23T16:43:58.974445",
+  "calibration_info": {
+    "blob_positions": [
+      [
+        359.0,
+        257.0
+      ],
+      [
+        259.0,
+        257.0
+      ],
+      [
+        357.0,
+        153.0
+      ],
+      [
+        261.0,
+        153.1
+      ]
+    ],
+    "number_of_targets": 1
+  },
+  "targets": [
+    {
+      "target_number": 1,
+      "blob_positions": [
+        [
+          359.0,
+          257.0
+        ],
+        [
+          259.0,
+          257.0
+        ],
+        [
+          357.0,
+          153.0
+        ],
+        [
+          261.0,
+          153.1
+        ]
+      ],
+      "target_bounds": {
+        "min_x": 259.0,
+        "max_x": 359.0,
+        "min_y": 153.0,
+        "max_y": 257.0,
+        "width": 100.0,
+        "height": 104.0,
+        "center_x": 309.0,
+        "center_y": 205.0
+      },
+      "shots": [
+        {
+          "timestamp": "2025-07-23T16:43:43.319147",
+          "shot_number": 1,
+          "absolute_position": {
+            "x": 309.04112662013955,
+            "y": 175.98709368348852
+          },
+          "relative_position": {
+            "relative_x": 0.5004112662013955,
+            "relative_y": 0.22102974695662042,
+            "offset_x": 0.041126620139550596,
+            "offset_y": -29.012906316511476
+          },
+          "detection_strategy": "hsv_direct",
+          "frame_number": 11
+        },
+        {
+          "timestamp": "2025-07-23T16:43:43.319243",
+          "shot_number": 2,
+          "absolute_position": {
+            "x": 313.20238095238096,
+            "y": 183.43650793650792
+          },
+          "relative_position": {
+            "relative_x": 0.5420238095238097,
+            "relative_y": 0.29265873015873,
+            "offset_x": 4.202380952380963,
+            "offset_y": -21.563492063492077
+          },
+          "detection_strategy": "hsv_direct",
+          "frame_number": 25
+        },
+        {
+          "timestamp": "2025-07-23T16:43:43.319258",
+          "shot_number": 3,
+          "absolute_position": {
+            "x": 318.3276417463537,
+            "y": 174.9203346855984
+          },
+          "relative_position": {
+            "relative_x": 0.5932764174635372,
+            "relative_y": 0.21077244889998453,
+            "offset_x": 9.32764174635372,
+            "offset_y": -30.07966531440161
+          },
+          "detection_strategy": "hsv_direct",
+          "frame_number": 38
+        },
+        {
+          "timestamp": "2025-07-23T16:43:43.319265",
+          "shot_number": 4,
+          "absolute_position": {
+            "x": 323.0542929292929,
+            "y": 168.625
+          },
+          "relative_position": {
+            "relative_x": 0.640542929292929,
+            "relative_y": 0.1502403846153846,
+            "offset_x": 14.054292929292899,
+            "offset_y": -36.375
+          },
+          "detection_strategy": "hsv_direct",
+          "frame_number": 51
+        },
+        {
+          "timestamp": "2025-07-23T16:43:43.319309",
+          "shot_number": 5,
+          "absolute_position": {
+            "x": 322.8333333333333,
+            "y": 185.31275720164606
+          },
+          "relative_position": {
+            "relative_x": 0.6383333333333332,
+            "relative_y": 0.310699588477366,
+            "offset_x": 13.833333333333314,
+            "offset_y": -19.687242798353935
+          },
+          "detection_strategy": "hsv_direct",
+          "frame_number": 68
+        }
+      ]
+    }
+  ]
+}
