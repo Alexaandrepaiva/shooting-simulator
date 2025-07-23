@@ -1,5 +1,5 @@
 {
-  "processing_timestamp": "2025-07-23T16:43:58.974445",
+  "processing_timestamp": "2025-07-23T17:19:17.287601",
   "calibration_info": {
     "blob_positions": [
       [
@@ -54,81 +54,81 @@
       },
       "shots": [
         {
-          "timestamp": "2025-07-23T16:43:43.319147",
+          "timestamp": "2025-07-23T17:11:16.296715",
           "shot_number": 1,
           "absolute_position": {
-            "x": 309.04112662013955,
-            "y": 175.98709368348852
+            "x": 260,
+            "y": 153.5
           },
           "relative_position": {
-            "relative_x": 0.5004112662013955,
-            "relative_y": 0.22102974695662042,
-            "offset_x": 0.041126620139550596,
-            "offset_y": -29.012906316511476
+            "relative_x": 0.01,
+            "relative_y": 0.004807692307692308,
+            "offset_x": -49.0,
+            "offset_y": -51.5
           },
           "detection_strategy": "hsv_direct",
           "frame_number": 11
         },
         {
-          "timestamp": "2025-07-23T16:43:43.319243",
+          "timestamp": "2025-07-23T17:11:16.296744",
           "shot_number": 2,
           "absolute_position": {
-            "x": 313.20238095238096,
-            "y": 183.43650793650792
+            "x": 358.85,
+            "y": 153.5
           },
           "relative_position": {
-            "relative_x": 0.5420238095238097,
-            "relative_y": 0.29265873015873,
-            "offset_x": 4.202380952380963,
-            "offset_y": -21.563492063492077
+            "relative_x": 0.9985000000000003,
+            "relative_y": 0.004807692307692308,
+            "offset_x": 49.85000000000002,
+            "offset_y": -51.5
           },
           "detection_strategy": "hsv_direct",
           "frame_number": 25
         },
         {
-          "timestamp": "2025-07-23T16:43:43.319258",
+          "timestamp": "2025-07-23T17:11:16.296753",
           "shot_number": 3,
           "absolute_position": {
-            "x": 318.3276417463537,
-            "y": 174.9203346855984
+            "x": 358.85,
+            "y": 256.5
           },
           "relative_position": {
-            "relative_x": 0.5932764174635372,
-            "relative_y": 0.21077244889998453,
-            "offset_x": 9.32764174635372,
-            "offset_y": -30.07966531440161
+            "relative_x": 0.9985000000000003,
+            "relative_y": 0.9951923076923077,
+            "offset_x": 49.85000000000002,
+            "offset_y": 51.5
           },
           "detection_strategy": "hsv_direct",
           "frame_number": 38
         },
         {
-          "timestamp": "2025-07-23T16:43:43.319265",
+          "timestamp": "2025-07-23T17:11:16.296763",
           "shot_number": 4,
           "absolute_position": {
-            "x": 323.0542929292929,
-            "y": 168.625
+            "x": 260,
+            "y": 256.5
           },
           "relative_position": {
-            "relative_x": 0.640542929292929,
-            "relative_y": 0.1502403846153846,
-            "offset_x": 14.054292929292899,
-            "offset_y": -36.375
+            "relative_x": 0.01,
+            "relative_y": 0.9951923076923077,
+            "offset_x": -49.0,
+            "offset_y": 51.5
           },
           "detection_strategy": "hsv_direct",
           "frame_number": 51
         },
         {
-          "timestamp": "2025-07-23T16:43:43.319309",
+          "timestamp": "2025-07-23T17:11:16.296768",
           "shot_number": 5,
           "absolute_position": {
-            "x": 322.8333333333333,
-            "y": 185.31275720164606
+            "x": 309,
+            "y": 205
           },
           "relative_position": {
-            "relative_x": 0.6383333333333332,
-            "relative_y": 0.310699588477366,
-            "offset_x": 13.833333333333314,
-            "offset_y": -19.687242798353935
+            "relative_x": 0.5,
+            "relative_y": 0.5,
+            "offset_x": 0.0,
+            "offset_y": 0.0
           },
           "detection_strategy": "hsv_direct",
           "frame_number": 68

@@ -163,8 +163,8 @@ class VideoAnalysisController:
             # Draw shots on the image using target coordinates with sophisticated label positioning
             self._draw_shots_with_smart_labels(result_image, shots, img_width, img_height)
                               
-            # Add target information
-            info_text = f"Alvo {target_number} - {len(shots)} tiros"
+            # Add target information - simplified title
+            info_text = f"Alvo {target_number}"
             cv2.putText(result_image, info_text, (10, 30),
                        cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 3)
             cv2.putText(result_image, info_text, (10, 30),
@@ -181,10 +181,13 @@ class VideoAnalysisController:
             cv2.putText(result_image, timestamp, (text_x, text_y),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 100, 100), 1)
             
-            # Save result image
-            timestamp_filename = datetime.now().strftime("%Y%m%d_%H%M%S")
-            result_filename = f"target_{target_number}_result_{timestamp_filename}.jpg"
-            result_path = os.path.join("Video", result_filename)
+            # Create output directory if it doesn't exist
+            os.makedirs("output", exist_ok=True)
+            
+            # Save result image with new filename format
+            timestamp_filename = datetime.now().strftime("%Y%m%d-%H%M%S")
+            result_filename = f"target-{target_number}-{timestamp_filename}.jpg"
+            result_path = os.path.join("output", result_filename)
             
             cv2.imwrite(result_path, result_image)
             logging.info(f"Result image saved: {result_path}")
@@ -197,8 +200,7 @@ class VideoAnalysisController:
         import cv2
         import numpy as np
         
-        # Track all red elements (shots and labels) to avoid overlaps
-        # Store as (x, y, width, height) for each element representing its bounding box
+        # Track used areas to avoid overlaps
         used_areas = []
         valid_shots = []
         
@@ -212,12 +214,12 @@ class VideoAnalysisController:
             
             # Ensure shot is within image bounds
             if 0 <= shot_x < img_width and 0 <= shot_y < img_height:
-                # Draw shot circle
-                cv2.circle(result_image, (shot_x, shot_y), 8, (0, 0, 255), -1)  # Red filled circle
-                cv2.circle(result_image, (shot_x, shot_y), 10, (255, 255, 255), 2)  # White border
+                # Draw smaller shot circle
+                cv2.circle(result_image, (shot_x, shot_y), 5, (0, 0, 255), -1)  # Red filled circle (reduced size)
+                cv2.circle(result_image, (shot_x, shot_y), 7, (255, 255, 255), 2)  # White border (reduced size)
                 
-                # Add the shot position to used areas with a bounding box (20x20 pixels)
-                shot_area = (shot_x - 10, shot_y - 10, 20, 20)
+                # Add the shot position to used areas (smaller area)
+                shot_area = (shot_x - 8, shot_y - 8, 16, 16)
                 used_areas.append(shot_area)
                 
                 valid_shots.append((shot, shot_x, shot_y))
@@ -227,8 +229,15 @@ class VideoAnalysisController:
                 logging.warning(f"Shot {shot['shot_number']} outside image bounds: ({shot_x}, {shot_y})")
         
         # Function to check if two rectangles overlap
+        def rectangles_overlap_any(rect, used_areas_list):
+            """Check if rectangle overlaps with any used area"""
+            for used_rect in used_areas_list:
+                if rectangles_overlap(rect, used_rect):
+                    return True
+            return False
+        
         def rectangles_overlap(rect1, rect2):
-            # rect format: (x, y, width, height)
+            """Check if two rectangles overlap"""
             x1, y1, w1, h1 = rect1
             x2, y2, w2, h2 = rect2
             
@@ -248,95 +257,76 @@ class VideoAnalysisController:
             # Define potential positions for the label
             label_text = str(shot['shot_number'])
             font = cv2.FONT_HERSHEY_SIMPLEX
-            font_scale = 0.6
-            font_thickness = 2
-            text_size, _ = cv2.getTextSize(label_text, font, font_scale, font_thickness)
+            font_scale = 0.4  # Reduced font size
+            outline_thickness = 2
+            text_thickness = 1
+            text_size, _ = cv2.getTextSize(label_text, font, font_scale, text_thickness)
             
-            # Add padding around text size for better spacing
-            text_width = text_size[0] + 8  # Add padding
-            text_height = text_size[1] + 8  # Add padding
+            # Add padding around text for collision detection
+            text_width = text_size[0] + 6
+            text_height = text_size[1] + 6
             
-            # 5 different positions to try: right, top-right, bottom-right, top-left, bottom-left
+            # Try different positions with more options for better placement
             label_offsets = [
-                (15, -text_height//2),            # right
-                (15, -(text_height + 5)),         # top-right
-                (15, 15),                         # bottom-right
-                (-(text_width + 5), -text_height//2), # top-left
-                (-(text_width + 5), 15)           # bottom-left
+                (12, -text_height//2),              # right
+                (12, -(text_height + 3)),           # top-right
+                (12, 12),                           # bottom-right
+                (-(text_width + 3), -text_height//2), # left
+                (-(text_width + 3), -(text_height + 3)), # top-left
+                (-(text_width + 3), 12),            # bottom-left
+                (-text_width//2, -(text_height + 8)), # top-center
+                (-text_width//2, 15),               # bottom-center
+                (15, -5),                           # top-right diagonal
+                (15, 8),                            # bottom-right diagonal
+                (-15, -5),                          # top-left diagonal
+                (-15, 8)                            # bottom-left diagonal
             ]
             
-            # Try each position and check for overlaps
             label_placed = False
             for offset_x, offset_y in label_offsets:
-                # Calculate label position
-                label_pos = (shot_x + offset_x, shot_y + offset_y)
+                label_x = shot_x + offset_x
+                label_y = shot_y + offset_y
                 
-                # Check if label will be within image bounds
-                if (label_pos[0] < 0 or label_pos[1] - text_height < 0 or 
-                    label_pos[0] + text_width > img_width or label_pos[1] > img_height):
-                    continue
-                
-                # Create a rectangle representing the label area
-                # Adjust y-position to account for text being drawn above the position
-                label_rect = (
-                    label_pos[0], 
-                    label_pos[1] - text_height, 
-                    text_width, 
-                    text_height
-                )
-                
-                # Check if this position would overlap with any existing elements
-                will_overlap = False
-                for area in used_areas:
-                    if rectangles_overlap(label_rect, area):
-                        will_overlap = True
+                # Check bounds
+                if (label_x >= 0 and label_y >= 0 and 
+                    label_x + text_width < result_image.shape[1] and
+                    label_y + text_height < result_image.shape[0]):
+                    
+                    # Check for overlaps
+                    label_area = (label_x, label_y, text_width, text_height)
+                    if not rectangles_overlap_any(label_area, used_areas):
+                        # Place label with red font and white outline (no background)
+                        text_y = label_y + text_size[1] + 3
+                        text_x = label_x + 3
+                        
+                        # Draw white outline
+                        cv2.putText(result_image, label_text, (text_x, text_y), 
+                                  font, font_scale, (255, 255, 255), outline_thickness)
+                        
+                        # Draw red text
+                        cv2.putText(result_image, label_text, (text_x, text_y), 
+                                  font, font_scale, (0, 0, 255), text_thickness)
+                        
+                        # Add to used areas
+                        used_areas.append(label_area)
+                        label_placed = True
                         break
-                
-                if not will_overlap:
-                    # This position is good, draw the label
-                    # White background for label
-                    cv2.rectangle(result_image, 
-                                (label_pos[0] - 2, label_pos[1] - text_height + 2),
-                                (label_pos[0] + text_width - 6, label_pos[1] + 2),
-                                (255, 255, 255), -1)
-                    
-                    # Red text
-                    cv2.putText(result_image, label_text, 
-                               (label_pos[0], label_pos[1]), 
-                               font, font_scale, (0, 0, 255), font_thickness)
-                    
-                    # Add this label position to used areas
-                    used_areas.append(label_rect)
-                    label_placed = True
-                    break
             
-            # If all positions overlap, use the first position anyway (right side)
             if not label_placed:
-                default_offset = label_offsets[0]
-                default_pos = (shot_x + default_offset[0], shot_y + default_offset[1])
+                logging.warning(f"Could not place label for shot {shot['shot_number']} - trying fallback position")
+                # Fallback: place label directly on the shot with smaller offset
+                text_y = shot_y + text_size[1]//2
+                text_x = shot_x - text_size[0]//2
                 
-                # Ensure default position is within bounds
-                if (default_pos[0] + text_width <= img_width and default_pos[1] <= img_height and
-                    default_pos[0] >= 0 and default_pos[1] - text_height >= 0):
+                # Ensure fallback position is within bounds
+                if text_x >= 0 and text_y >= 0 and text_x + text_size[0] < result_image.shape[1] and text_y < result_image.shape[0]:
+                    # Draw white outline
+                    cv2.putText(result_image, label_text, (text_x, text_y), 
+                              font, font_scale, (255, 255, 255), outline_thickness)
                     
-                    # White background for label
-                    cv2.rectangle(result_image, 
-                                (default_pos[0] - 2, default_pos[1] - text_height + 2),
-                                (default_pos[0] + text_width - 6, default_pos[1] + 2),
-                                (255, 255, 255), -1)
-                    
-                    # Red text
-                    cv2.putText(result_image, label_text, 
-                               (default_pos[0], default_pos[1]), 
-                               font, font_scale, (0, 0, 255), font_thickness)
-                    
-                    label_rect = (
-                        default_pos[0],
-                        default_pos[1] - text_height,
-                        text_width,
-                        text_height
-                    )
-                    used_areas.append(label_rect)
+                    # Draw red text
+                    cv2.putText(result_image, label_text, (text_x, text_y), 
+                              font, font_scale, (0, 0, 255), text_thickness)
             
     def stop_analysis(self):
         """Stop current video analysis if running"""
