@@ -73,8 +73,7 @@ class AppController:
             level=logging.INFO,
             format='%(asctime)s - %(levelname)s - %(message)s',
             handlers=[
-                logging.StreamHandler(),  # Console output
-                logging.FileHandler('shooting_simulator.log')  # File output
+                logging.StreamHandler()  # Console output
             ]
         )
         

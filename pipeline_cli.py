@@ -31,8 +31,7 @@ class PipelineCLI:
             level=logging.INFO,
             format='%(asctime)s - %(levelname)s - %(message)s',
             handlers=[
-                logging.StreamHandler(),
-                logging.FileHandler('pipeline_cli.log')
+                logging.StreamHandler()
             ]
         )
         
