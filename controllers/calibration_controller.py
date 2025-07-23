@@ -313,12 +313,19 @@ class CalibrationController:
             else:
                 logging.error("Failed to calculate homographies")
             
+            # Stop loading state before navigation
+            if self.view:
+                self.view.stop_save_loading()
+            
             # Navigate to simulation view after calibration
             self.stop_calibration()
             self.app_controller.navigate_to_simulation()
             
         except Exception as e:
             logging.error(f"Error saving calibration parameters: {e}")
+            # Stop loading state on error
+            if self.view:
+                self.view.stop_save_loading()
             
     def cleanup(self):
         """Clean up resources when closing"""

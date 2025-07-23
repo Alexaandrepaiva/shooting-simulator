@@ -3,6 +3,7 @@ import logging
 import cv2
 from PIL import Image
 from .base import View
+from utils.spinner import ButtonStateManager
 
 
 class SimulationView(View):
@@ -14,6 +15,7 @@ class SimulationView(View):
         self.recording_button = None
         self.recalibrate_button = None
         self.is_recording = False
+        self.button_state_manager = ButtonStateManager()
         self.create_widgets()
         
     def create_widgets(self):
@@ -86,8 +88,17 @@ class SimulationView(View):
         )
         self.recalibrate_button.grid(row=0, column=1, sticky="ew", padx=10, pady=10)
         
+        # Add buttons to state manager
+        self.button_state_manager.add_button("recording", self.recording_button)
+        self.button_state_manager.add_button("recalibrate", self.recalibrate_button)
+        
     def on_recording_button_click(self):
         """Handle recording button click"""
+        if self.button_state_manager.is_loading("recording"):
+            return  # Prevent multiple clicks
+            
+        self.start_recording_loading()
+        
         if self.controller:
             if self.is_recording:
                 self.controller.stop_recording()
@@ -96,7 +107,12 @@ class SimulationView(View):
                 
     def on_recalibrate_button_click(self):
         """Handle recalibrate button click"""
+        if self.button_state_manager.is_loading("recalibrate"):
+            return  # Prevent multiple clicks
+            
         logging.info("Recalibrate button clicked")
+        self.start_recalibrate_loading()
+        
         if self.controller:
             self.controller.handle_recalibrate()
             
@@ -131,6 +147,26 @@ class SimulationView(View):
                 text="Câmera não disponível\nVerifique se a câmera está conectada",
                 image=None
             )
+    
+    def start_recording_loading(self):
+        """Start loading state for Recording button"""
+        self.button_state_manager.start_loading("recording")
+        
+    def stop_recording_loading(self):
+        """Stop loading state for Recording button"""
+        self.button_state_manager.stop_loading("recording")
+        
+    def start_recalibrate_loading(self):
+        """Start loading state for Recalibrate button"""
+        self.button_state_manager.start_loading("recalibrate")
+        
+    def stop_recalibrate_loading(self):
+        """Stop loading state for Recalibrate button"""
+        self.button_state_manager.stop_loading("recalibrate")
+        
+    def stop_all_loading(self):
+        """Stop loading state for all buttons"""
+        self.button_state_manager.stop_all_loading()
             
     def show(self):
         """Show the simulation view"""
@@ -138,4 +174,9 @@ class SimulationView(View):
         
     def hide(self):
         """Hide the simulation view"""
-        self.frame.pack_forget() 
+        self.frame.pack_forget()
+        
+    def destroy(self):
+        """Clean up resources when view is destroyed"""
+        self.button_state_manager.cleanup()
+        super().destroy() 

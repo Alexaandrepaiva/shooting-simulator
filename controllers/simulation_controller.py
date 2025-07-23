@@ -164,6 +164,8 @@ class SimulationController:
         """Start video recording"""
         if self.is_recording:
             logging.warning("Recording already in progress")
+            if self.view:
+                self.view.stop_recording_loading()
             return
             
         try:
@@ -195,6 +197,7 @@ class SimulationController:
             # Update view state
             if self.view:
                 self.view.update_recording_state(True)
+                self.view.stop_recording_loading()
                 
             logging.info(f"Started recording to: {self.video_filepath}")
             
@@ -204,11 +207,16 @@ class SimulationController:
             if self.video_writer:
                 self.video_writer.release()
                 self.video_writer = None
+            # Stop loading state on error
+            if self.view:
+                self.view.stop_recording_loading()
                 
     def stop_recording(self):
         """Stop video recording"""
         if not self.is_recording:
             logging.warning("No recording in progress")
+            if self.view:
+                self.view.stop_recording_loading()
             return
             
         try:
@@ -227,6 +235,7 @@ class SimulationController:
             # Update view state
             if self.view:
                 self.view.update_recording_state(False)
+                self.view.stop_recording_loading()
                 
             logging.info(f"Recording stopped. Saved {self.frames_written} frames to: {self.video_filepath}")
             logging.info(f"Recording duration: {duration:.2f} seconds")
@@ -244,6 +253,9 @@ class SimulationController:
             
         except Exception as e:
             logging.error(f"Error stopping recording: {e}")
+            # Stop loading state on error
+            if self.view:
+                self.view.stop_recording_loading()
             return None
             
     def _record_frame(self, frame):
@@ -262,11 +274,22 @@ class SimulationController:
             
     def handle_recalibrate(self):
         """Handle recalibration request"""
-        # Stop current simulation
-        self.stop_simulation()
-        
-        # Navigate back to calibration
-        self.app_controller.navigate_to_calibration()
+        try:
+            # Stop current simulation
+            self.stop_simulation()
+            
+            # Navigate back to calibration
+            self.app_controller.navigate_to_calibration()
+            
+            # Stop loading state after successful navigation
+            if self.view:
+                self.view.stop_recalibrate_loading()
+                
+        except Exception as e:
+            logging.error(f"Error during recalibration: {e}")
+            # Stop loading state on error
+            if self.view:
+                self.view.stop_recalibrate_loading()
         
     def cleanup(self):
         """Clean up resources when closing"""

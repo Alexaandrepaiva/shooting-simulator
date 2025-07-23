@@ -18,13 +18,31 @@ class MenuController:
     def handle_iniciar(self):
         """Handle the Iniciar button click"""
         logging.info("Iniciar button clicked")
-        # Navigate to calibration view
-        self.app_controller.navigate_to_calibration()
+        try:
+            # Navigate to calibration view
+            self.app_controller.navigate_to_calibration()
+            # Stop loading state after successful navigation
+            if self.view:
+                self.view.stop_iniciar_loading()
+        except Exception as e:
+            logging.error(f"Error during navigation: {e}")
+            # Stop loading state on error
+            if self.view:
+                self.view.stop_iniciar_loading()
         
     def handle_manual(self):
         """Handle the Manual de instruções button click"""
         logging.info("Manual de Instrucoes button clicked")
-        self.open_manual_pdf()
+        try:
+            self.open_manual_pdf()
+            # Stop loading state after successful PDF opening
+            if self.view:
+                self.view.stop_manual_loading()
+        except Exception as e:
+            logging.error(f"Error opening manual: {e}")
+            # Stop loading state on error
+            if self.view:
+                self.view.stop_manual_loading()
         
     def open_manual_pdf(self):
         """Open the manual PDF file"""
