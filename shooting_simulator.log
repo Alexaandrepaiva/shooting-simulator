@@ -1,0 +1,773 @@
+2025-07-23 09:34:45,130 - INFO - Navigated to starting menu
+2025-07-23 09:34:45,130 - INFO - Application initialized successfully
+2025-07-23 09:34:45,130 - INFO - Starting application main loop
+2025-07-23 09:34:48,925 - INFO - Iniciar button clicked
+2025-07-23 09:34:48,926 - INFO - Iniciar button clicked
+2025-07-23 09:34:50,283 - INFO - Iniciar button clicked
+2025-07-23 09:34:50,284 - INFO - Iniciar button clicked
+2025-07-23 09:34:51,457 - INFO - Manual de Instrucoes button clicked
+2025-07-23 09:34:51,457 - INFO - Manual de Instrucoes button clicked
+2025-07-23 09:34:51,682 - INFO - Manual PDF opened: resources\files\manual.pdf
+2025-07-23 09:35:05,904 - INFO - Application terminated
+2025-07-23 09:44:10,140 - INFO - Navigated to starting menu
+2025-07-23 09:44:10,140 - INFO - Application initialized successfully
+2025-07-23 09:44:10,141 - INFO - Starting application main loop
+2025-07-23 09:44:15,840 - INFO - Iniciar button clicked
+2025-07-23 09:44:15,841 - INFO - Iniciar button clicked
+2025-07-23 09:44:17,075 - INFO - Camera initialized successfully
+2025-07-23 09:44:17,544 - INFO - Calibration started successfully
+2025-07-23 09:44:17,544 - INFO - Navigated to calibration view
+2025-07-23 09:44:35,169 - INFO - Application terminated
+2025-07-23 09:47:50,110 - INFO - Navigated to starting menu
+2025-07-23 09:47:50,111 - INFO - Application initialized successfully
+2025-07-23 09:47:50,111 - INFO - Starting application main loop
+2025-07-23 09:47:51,565 - INFO - Iniciar button clicked
+2025-07-23 09:47:51,565 - INFO - Iniciar button clicked
+2025-07-23 09:47:52,115 - INFO - Camera initialized successfully
+2025-07-23 09:47:52,728 - INFO - Calibration started successfully
+2025-07-23 09:47:52,729 - INFO - Navigated to calibration view
+2025-07-23 09:48:23,308 - INFO - Application terminated
+2025-07-23 09:51:18,004 - INFO - Navigated to starting menu
+2025-07-23 09:51:18,005 - INFO - Application initialized successfully
+2025-07-23 09:51:18,005 - INFO - Starting application main loop
+2025-07-23 09:51:20,067 - INFO - Iniciar button clicked
+2025-07-23 09:51:20,067 - INFO - Iniciar button clicked
+2025-07-23 09:51:20,619 - INFO - Camera initialized successfully
+2025-07-23 09:51:21,218 - INFO - Calibration started successfully
+2025-07-23 09:51:21,218 - INFO - Navigated to calibration view
+2025-07-23 09:51:55,233 - INFO - Calibration parameters saved successfully to data\calibration_data.json
+2025-07-23 09:51:55,234 - INFO - Blob positions: 4 positions detected
+2025-07-23 09:51:55,571 - INFO - Calibration stopped
+2025-07-23 09:51:55,572 - INFO - Navigated to starting menu
+2025-07-23 09:52:25,717 - INFO - Application terminated
+2025-07-23 09:57:23,605 - INFO - Navigated to starting menu
+2025-07-23 09:57:23,606 - INFO - Application initialized successfully
+2025-07-23 09:57:23,606 - INFO - Starting application main loop
+2025-07-23 09:57:27,896 - INFO - Iniciar button clicked
+2025-07-23 09:57:27,897 - INFO - Iniciar button clicked
+2025-07-23 09:57:28,542 - INFO - Camera initialized successfully
+2025-07-23 09:57:29,206 - INFO - Calibration started successfully
+2025-07-23 09:57:29,207 - INFO - Navigated to calibration view
+2025-07-23 09:57:35,993 - INFO - Calibration parameters saved successfully to data\calibration_data.json
+2025-07-23 09:57:35,994 - INFO - Targets: 1, Expected blobs: 4, Detected blobs: 3
+2025-07-23 09:57:35,994 - WARNING - Warning: Only detected 3 blobs, expected 4 for 1 targets
+2025-07-23 09:57:36,347 - INFO - Calibration stopped
+2025-07-23 09:57:36,350 - INFO - Navigated to starting menu
+2025-07-23 09:57:39,469 - INFO - Application terminated
+2025-07-23 09:58:51,280 - INFO - Navigated to starting menu
+2025-07-23 09:58:51,280 - INFO - Application initialized successfully
+2025-07-23 09:58:51,281 - INFO - Starting application main loop
+2025-07-23 09:58:52,314 - INFO - Iniciar button clicked
+2025-07-23 09:58:52,315 - INFO - Iniciar button clicked
+2025-07-23 09:58:52,839 - INFO - Camera initialized successfully
+2025-07-23 09:58:53,464 - INFO - Calibration started successfully
+2025-07-23 09:58:53,465 - INFO - Navigated to calibration view
+2025-07-23 09:58:55,233 - INFO - Calibration parameters saved successfully to data\calibration_data.json
+2025-07-23 09:58:55,233 - INFO - Targets: 1, Expected blobs: 4, Detected blobs: 3
+2025-07-23 09:58:55,233 - WARNING - Warning: Only detected 3 blobs, expected 4 for 1 targets
+2025-07-23 09:58:55,584 - INFO - Calibration stopped
+2025-07-23 09:58:55,586 - INFO - Navigated to starting menu
+2025-07-23 09:58:57,503 - INFO - Application terminated
+2025-07-23 10:31:19,297 - INFO - Navigated to starting menu
+2025-07-23 10:31:19,298 - INFO - Application initialized successfully
+2025-07-23 10:31:19,298 - INFO - Starting application main loop
+2025-07-23 10:31:26,012 - INFO - Iniciar button clicked
+2025-07-23 10:31:26,012 - INFO - Iniciar button clicked
+2025-07-23 10:31:36,967 - INFO - Camera initialized successfully
+2025-07-23 10:31:37,448 - INFO - Calibration started successfully
+2025-07-23 10:31:37,449 - INFO - Navigated to calibration view
+2025-07-23 10:32:36,838 - INFO - Calibration parameters saved successfully to data\calibration_data.json
+2025-07-23 10:32:36,838 - INFO - Targets: 1, Expected blobs: 4, Detected blobs: 4
+2025-07-23 10:32:37,156 - INFO - Calibration stopped
+2025-07-23 10:32:51,271 - INFO - Camera initialized successfully
+2025-07-23 10:32:51,714 - INFO - Simulation started successfully
+2025-07-23 10:32:51,714 - INFO - Navigated to simulation view
+2025-07-23 10:32:56,951 - INFO - Started recording to: Video\shooting_20250723_103256.mp4
+2025-07-23 10:33:06,723 - INFO - Recording stopped. Saved 174 frames to: Video\shooting_20250723_103256.mp4
+2025-07-23 10:33:06,724 - INFO - Recording duration: 9.74 seconds
+2025-07-23 10:33:47,057 - INFO - Started recording to: Video\shooting_20250723_103347.mp4
+2025-07-23 10:33:54,220 - INFO - Recording stopped. Saved 111 frames to: Video\shooting_20250723_103347.mp4
+2025-07-23 10:33:54,220 - INFO - Recording duration: 7.16 seconds
+2025-07-23 10:34:14,754 - INFO - Recalibrate button clicked
+2025-07-23 10:34:15,052 - INFO - Simulation stopped
+2025-07-23 10:34:24,905 - INFO - Camera initialized successfully
+2025-07-23 10:34:25,379 - INFO - Calibration started successfully
+2025-07-23 10:34:25,379 - INFO - Navigated to calibration view
+2025-07-23 10:34:29,884 - INFO - Calibration parameters saved successfully to data\calibration_data.json
+2025-07-23 10:34:29,884 - INFO - Targets: 1, Expected blobs: 4, Detected blobs: 4
+2025-07-23 10:34:30,162 - INFO - Calibration stopped
+2025-07-23 10:34:43,708 - INFO - Camera initialized successfully
+2025-07-23 10:34:44,136 - INFO - Simulation started successfully
+2025-07-23 10:34:44,137 - INFO - Navigated to simulation view
+2025-07-23 10:34:54,949 - INFO - Application terminated
+2025-07-23 10:52:52,270 - INFO - Navigated to starting menu
+2025-07-23 10:52:52,271 - INFO - Application initialized successfully
+2025-07-23 10:52:52,271 - INFO - Starting application main loop
+2025-07-23 10:52:54,501 - INFO - Iniciar button clicked
+2025-07-23 10:52:54,502 - INFO - Iniciar button clicked
+2025-07-23 10:53:04,526 - INFO - Camera initialized successfully
+2025-07-23 10:53:05,047 - INFO - Calibration started successfully
+2025-07-23 10:53:05,047 - INFO - Navigated to calibration view
+2025-07-23 10:53:09,508 - INFO - Calibration parameters saved successfully to data\calibration_data.json
+2025-07-23 10:53:09,509 - INFO - Targets: 1, Expected blobs: 4, Detected blobs: 4
+2025-07-23 10:53:09,815 - INFO - Calibration stopped
+2025-07-23 10:53:22,038 - INFO - Camera initialized successfully
+2025-07-23 10:53:22,450 - INFO - Simulation started successfully
+2025-07-23 10:53:22,450 - INFO - Navigated to simulation view
+2025-07-23 10:53:25,039 - INFO - Started recording to: Video\shooting_20250723_105324.mp4
+2025-07-23 10:53:31,988 - INFO - Recording stopped. Saved 109 frames to: Video\shooting_20250723_105324.mp4
+2025-07-23 10:53:31,988 - INFO - Recording duration: 6.94 seconds
+2025-07-23 10:53:31,988 - INFO - Starting automatic video analysis...
+2025-07-23 10:53:31,989 - INFO - Starting async video analysis for: Video\shooting_20250723_105324.mp4
+2025-07-23 10:53:31,999 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 10:53:31,999 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_105324.mp4
+2025-07-23 10:53:31,999 - INFO - Target configuration: 1 targets, 3 shots per series
+2025-07-23 10:53:32,000 - INFO - Processing target 1 with blobs: [[384.0, 262.0], [287.0, 262.0], [382.0, 161.0], [288.0, 161.0]]
+2025-07-23 10:53:32,049 - INFO - Target 1: Processing 109 frames
+2025-07-23 10:53:32,050 - INFO - Target 1: Trying strategy 1/4 - rgb_enhanced
+2025-07-23 10:53:32,178 - INFO - Target 1: Shot 1 detected at (114.2, 105.1) using rgb_enhanced
+2025-07-23 10:53:32,195 - INFO - Video analysis progress: 27.5%
+2025-07-23 10:53:32,230 - INFO - Target 1: Shot 2 detected at (60.1, 104.0) using rgb_enhanced
+2025-07-23 10:53:32,323 - INFO - Video analysis progress: 55.0%
+2025-07-23 10:53:32,328 - INFO - Target 1: Shot 3 detected at (250.4, 99.3) using rgb_enhanced
+2025-07-23 10:53:32,329 - INFO - Target 1: Found 3 shots using rgb_enhanced
+2025-07-23 10:53:32,332 - INFO - Target 1: Final result - 3 shots detected
+2025-07-23 10:53:32,334 - INFO - Shot data saved to: Video\shooting_20250723_105324_shots.json
+2025-07-23 10:53:32,334 - INFO - Shot detection completed. Found 3 shots total
+2025-07-23 10:53:32,366 - INFO - Result image saved: Video\target_1_result_20250723_105332.jpg
+2025-07-23 10:53:32,366 - INFO - Video analysis completed successfully: Analysis complete. Found 3 shots
+2025-07-23 10:53:32,366 - INFO - Video analysis completed successfully. Detected 3 shots
+2025-07-23 10:54:31,827 - INFO - Application terminated
+2025-07-23 11:18:02,929 - INFO - Navigated to starting menu
+2025-07-23 11:18:02,929 - INFO - Application initialized successfully
+2025-07-23 11:18:02,930 - INFO - Starting application main loop
+2025-07-23 11:18:04,747 - INFO - Iniciar button clicked
+2025-07-23 11:18:04,748 - INFO - Iniciar button clicked
+2025-07-23 11:18:14,447 - INFO - Camera initialized successfully
+2025-07-23 11:18:14,916 - INFO - Calibration started successfully
+2025-07-23 11:18:14,916 - INFO - Navigated to calibration view
+2025-07-23 11:18:17,299 - INFO - Calibration parameters saved successfully to data\calibration_data.json
+2025-07-23 11:18:17,299 - INFO - Targets: 1, Expected blobs: 4, Detected blobs: 4
+2025-07-23 11:18:17,300 - INFO - Calculated homography for target 1
+2025-07-23 11:18:17,301 - INFO -   Camera points: [[384.0, 262.0], [287.0, 262.0], [382.0, 161.0], [288.0, 161.0]]
+2025-07-23 11:18:17,301 - INFO - Homographies saved to: data\homographies.json
+2025-07-23 11:18:17,302 - INFO - Homographies calculated and saved successfully
+2025-07-23 11:18:17,603 - INFO - Calibration stopped
+2025-07-23 11:18:30,100 - INFO - Camera initialized successfully
+2025-07-23 11:18:30,507 - INFO - Simulation started successfully
+2025-07-23 11:18:30,507 - INFO - Navigated to simulation view
+2025-07-23 11:18:43,696 - INFO - Recalibrate button clicked
+2025-07-23 11:18:43,983 - INFO - Simulation stopped
+2025-07-23 11:18:53,387 - INFO - Camera initialized successfully
+2025-07-23 11:18:53,804 - INFO - Calibration started successfully
+2025-07-23 11:18:53,805 - INFO - Navigated to calibration view
+2025-07-23 11:19:29,770 - INFO - Calibration parameters saved successfully to data\calibration_data.json
+2025-07-23 11:19:29,771 - INFO - Targets: 1, Expected blobs: 4, Detected blobs: 4
+2025-07-23 11:19:29,772 - INFO - Calculated homography for target 1
+2025-07-23 11:19:29,772 - INFO -   Camera points: [[443.6, 195.8], [459.0, 90.0], [361.2, 76.1], [345.44444444444446, 181.33333333333334]]
+2025-07-23 11:19:29,773 - INFO - Homographies saved to: data\homographies.json
+2025-07-23 11:19:29,773 - INFO - Homographies calculated and saved successfully
+2025-07-23 11:19:30,071 - INFO - Calibration stopped
+2025-07-23 11:19:42,476 - INFO - Camera initialized successfully
+2025-07-23 11:19:42,894 - INFO - Simulation started successfully
+2025-07-23 11:19:42,894 - INFO - Navigated to simulation view
+2025-07-23 11:19:46,166 - INFO - Started recording to: Video\shooting_20250723_111946.mp4
+2025-07-23 11:19:56,134 - INFO - Recording stopped. Saved 145 frames to: Video\shooting_20250723_111946.mp4
+2025-07-23 11:19:56,134 - INFO - Recording duration: 9.97 seconds
+2025-07-23 11:19:56,135 - INFO - Starting automatic video analysis...
+2025-07-23 11:19:56,135 - INFO - Starting async video analysis for: Video\shooting_20250723_111946.mp4
+2025-07-23 11:19:56,147 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 11:19:56,148 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_111946.mp4
+2025-07-23 11:19:56,149 - INFO - Target configuration: 1 targets, 3 shots per series
+2025-07-23 11:19:56,167 - INFO - Loaded 1 homographies from file
+2025-07-23 11:19:56,168 - INFO - Processing target 1 with blobs: [[443.6, 195.8], [459.0, 90.0], [361.2, 76.1], [345.44444444444446, 181.33333333333334]]
+2025-07-23 11:19:56,183 - INFO - Target 1: Processing 145 frames
+2025-07-23 11:19:56,189 - INFO - Target 1: Trying strategy 1/4 - rgb_enhanced
+2025-07-23 11:19:56,394 - INFO - Video analysis progress: 20.7%
+2025-07-23 11:19:56,569 - INFO - Video analysis progress: 41.4%
+2025-07-23 11:19:56,724 - INFO - Video analysis progress: 62.1%
+2025-07-23 11:19:56,846 - INFO - Video analysis progress: 82.8%
+2025-07-23 11:19:56,954 - INFO - Target 1: Trying strategy 2/4 - rgb_subtraction
+2025-07-23 11:19:57,057 - INFO - Video analysis progress: 20.7%
+2025-07-23 11:19:57,172 - INFO - Video analysis progress: 41.4%
+2025-07-23 11:19:57,321 - INFO - Video analysis progress: 62.1%
+2025-07-23 11:19:57,458 - INFO - Video analysis progress: 82.8%
+2025-07-23 11:19:57,566 - INFO - Target 1: Trying strategy 3/4 - hsv_subtraction
+2025-07-23 11:19:57,678 - INFO - Video analysis progress: 20.7%
+2025-07-23 11:19:57,788 - INFO - Video analysis progress: 41.4%
+2025-07-23 11:19:57,895 - INFO - Video analysis progress: 62.1%
+2025-07-23 11:19:58,003 - INFO - Video analysis progress: 82.8%
+2025-07-23 11:19:58,093 - INFO - Target 1: Trying strategy 4/4 - hsv_direct
+2025-07-23 11:19:58,213 - INFO - Video analysis progress: 20.7%
+2025-07-23 11:19:58,347 - INFO - Video analysis progress: 41.4%
+2025-07-23 11:19:58,481 - INFO - Video analysis progress: 62.1%
+2025-07-23 11:19:58,593 - INFO - Video analysis progress: 82.8%
+2025-07-23 11:19:58,707 - INFO - Target 1: Final result - 0 shots detected
+2025-07-23 11:19:58,707 - INFO - Shot detection completed. Found 0 shots total
+2025-07-23 11:19:58,708 - INFO - Video analysis completed successfully: Analysis complete. Found 0 shots
+2025-07-23 11:19:58,708 - INFO - Video analysis completed successfully. Detected 0 shots
+2025-07-23 11:20:33,682 - INFO - Started recording to: Video\shooting_20250723_112033.mp4
+2025-07-23 11:20:38,119 - INFO - Recording stopped. Saved 72 frames to: Video\shooting_20250723_112033.mp4
+2025-07-23 11:20:38,120 - INFO - Recording duration: 4.44 seconds
+2025-07-23 11:20:38,120 - INFO - Starting automatic video analysis...
+2025-07-23 11:20:38,120 - INFO - Starting async video analysis for: Video\shooting_20250723_112033.mp4
+2025-07-23 11:20:38,122 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 11:20:38,122 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_112033.mp4
+2025-07-23 11:20:38,122 - INFO - Target configuration: 1 targets, 3 shots per series
+2025-07-23 11:20:38,123 - INFO - Loaded 1 homographies from file
+2025-07-23 11:20:38,123 - INFO - Processing target 1 with blobs: [[443.6, 195.8], [459.0, 90.0], [361.2, 76.1], [345.44444444444446, 181.33333333333334]]
+2025-07-23 11:20:38,133 - INFO - Target 1: Processing 72 frames
+2025-07-23 11:20:38,134 - INFO - Target 1: Trying strategy 1/4 - rgb_enhanced
+2025-07-23 11:20:38,276 - INFO - Video analysis progress: 41.7%
+2025-07-23 11:20:38,404 - INFO - Video analysis progress: 83.3%
+2025-07-23 11:20:38,451 - INFO - Target 1: Trying strategy 2/4 - rgb_subtraction
+2025-07-23 11:20:38,565 - INFO - Video analysis progress: 41.7%
+2025-07-23 11:20:38,664 - INFO - Video analysis progress: 83.3%
+2025-07-23 11:20:38,712 - INFO - Target 1: Trying strategy 3/4 - hsv_subtraction
+2025-07-23 11:20:38,828 - INFO - Video analysis progress: 41.7%
+2025-07-23 11:20:38,931 - INFO - Video analysis progress: 83.3%
+2025-07-23 11:20:38,981 - INFO - Target 1: Trying strategy 4/4 - hsv_direct
+2025-07-23 11:20:39,099 - INFO - Video analysis progress: 41.7%
+2025-07-23 11:20:39,227 - INFO - Video analysis progress: 83.3%
+2025-07-23 11:20:39,294 - INFO - Target 1: Final result - 0 shots detected
+2025-07-23 11:20:39,294 - INFO - Shot detection completed. Found 0 shots total
+2025-07-23 11:20:39,295 - INFO - Video analysis completed successfully: Analysis complete. Found 0 shots
+2025-07-23 11:20:39,295 - INFO - Video analysis completed successfully. Detected 0 shots
+2025-07-23 11:20:57,455 - INFO - Started recording to: Video\shooting_20250723_112057.mp4
+2025-07-23 11:21:06,836 - INFO - Recording stopped. Saved 145 frames to: Video\shooting_20250723_112057.mp4
+2025-07-23 11:21:06,836 - INFO - Recording duration: 9.38 seconds
+2025-07-23 11:21:06,837 - INFO - Starting automatic video analysis...
+2025-07-23 11:21:06,837 - INFO - Starting async video analysis for: Video\shooting_20250723_112057.mp4
+2025-07-23 11:21:06,840 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 11:21:06,840 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_112057.mp4
+2025-07-23 11:21:06,841 - INFO - Target configuration: 1 targets, 3 shots per series
+2025-07-23 11:21:06,841 - INFO - Loaded 1 homographies from file
+2025-07-23 11:21:06,842 - INFO - Processing target 1 with blobs: [[443.6, 195.8], [459.0, 90.0], [361.2, 76.1], [345.44444444444446, 181.33333333333334]]
+2025-07-23 11:21:06,853 - INFO - Target 1: Processing 145 frames
+2025-07-23 11:21:06,853 - INFO - Target 1: Trying strategy 1/4 - rgb_enhanced
+2025-07-23 11:21:07,009 - INFO - Video analysis progress: 20.7%
+2025-07-23 11:21:07,112 - INFO - Video analysis progress: 41.4%
+2025-07-23 11:21:07,213 - INFO - Video analysis progress: 62.1%
+2025-07-23 11:21:07,322 - INFO - Video analysis progress: 82.8%
+2025-07-23 11:21:07,420 - INFO - Target 1: Trying strategy 2/4 - rgb_subtraction
+2025-07-23 11:21:07,560 - INFO - Video analysis progress: 20.7%
+2025-07-23 11:21:07,663 - INFO - Video analysis progress: 41.4%
+2025-07-23 11:21:07,776 - INFO - Video analysis progress: 62.1%
+2025-07-23 11:21:07,886 - INFO - Video analysis progress: 82.8%
+2025-07-23 11:21:08,002 - INFO - Target 1: Trying strategy 3/4 - hsv_subtraction
+2025-07-23 11:21:08,119 - INFO - Video analysis progress: 20.7%
+2025-07-23 11:21:08,231 - INFO - Video analysis progress: 41.4%
+2025-07-23 11:21:08,335 - INFO - Video analysis progress: 62.1%
+2025-07-23 11:21:08,444 - INFO - Video analysis progress: 82.8%
+2025-07-23 11:21:08,549 - INFO - Target 1: Trying strategy 4/4 - hsv_direct
+2025-07-23 11:21:08,761 - INFO - Video analysis progress: 20.7%
+2025-07-23 11:21:08,963 - INFO - Video analysis progress: 41.4%
+2025-07-23 11:21:09,092 - INFO - Video analysis progress: 62.1%
+2025-07-23 11:21:09,225 - INFO - Video analysis progress: 82.8%
+2025-07-23 11:21:09,342 - INFO - Target 1: Final result - 0 shots detected
+2025-07-23 11:21:09,342 - INFO - Shot detection completed. Found 0 shots total
+2025-07-23 11:21:09,342 - INFO - Video analysis completed successfully: Analysis complete. Found 0 shots
+2025-07-23 11:21:09,343 - INFO - Video analysis completed successfully. Detected 0 shots
+2025-07-23 11:21:55,415 - INFO - Recalibrate button clicked
+2025-07-23 11:21:55,707 - INFO - Simulation stopped
+2025-07-23 11:22:05,591 - INFO - Camera initialized successfully
+2025-07-23 11:22:06,022 - INFO - Calibration started successfully
+2025-07-23 11:22:06,022 - INFO - Navigated to calibration view
+2025-07-23 11:22:24,392 - INFO - Calibration parameters saved successfully to data\calibration_data.json
+2025-07-23 11:22:24,392 - INFO - Targets: 1, Expected blobs: 4, Detected blobs: 4
+2025-07-23 11:22:24,393 - INFO - Calculated homography for target 1
+2025-07-23 11:22:24,393 - INFO -   Camera points: [[302.0, 232.0], [205.0, 232.0], [301.0, 129.0], [205.0, 128.0]]
+2025-07-23 11:22:24,395 - INFO - Homographies saved to: data\homographies.json
+2025-07-23 11:22:24,395 - INFO - Homographies calculated and saved successfully
+2025-07-23 11:22:24,682 - INFO - Calibration stopped
+2025-07-23 11:22:37,679 - INFO - Camera initialized successfully
+2025-07-23 11:22:38,106 - INFO - Simulation started successfully
+2025-07-23 11:22:38,107 - INFO - Navigated to simulation view
+2025-07-23 11:22:45,697 - INFO - Started recording to: Video\shooting_20250723_112245.mp4
+2025-07-23 11:22:53,461 - INFO - Recording stopped. Saved 125 frames to: Video\shooting_20250723_112245.mp4
+2025-07-23 11:22:53,462 - INFO - Recording duration: 7.77 seconds
+2025-07-23 11:22:53,462 - INFO - Starting automatic video analysis...
+2025-07-23 11:22:53,462 - INFO - Starting async video analysis for: Video\shooting_20250723_112245.mp4
+2025-07-23 11:22:53,471 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 11:22:53,472 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_112245.mp4
+2025-07-23 11:22:53,472 - INFO - Target configuration: 1 targets, 3 shots per series
+2025-07-23 11:22:53,486 - INFO - Loaded 1 homographies from file
+2025-07-23 11:22:53,487 - INFO - Processing target 1 with blobs: [[302.0, 232.0], [205.0, 232.0], [301.0, 129.0], [205.0, 128.0]]
+2025-07-23 11:22:53,503 - INFO - Target 1: Processing 125 frames
+2025-07-23 11:22:53,504 - INFO - Target 1: Trying strategy 1/4 - rgb_enhanced
+2025-07-23 11:22:53,661 - INFO - Video analysis progress: 24.0%
+2025-07-23 11:22:53,774 - INFO - Video analysis progress: 48.0%
+2025-07-23 11:22:53,888 - INFO - Video analysis progress: 72.0%
+2025-07-23 11:22:54,001 - INFO - Video analysis progress: 96.0%
+2025-07-23 11:22:54,015 - INFO - Target 1: Trying strategy 2/4 - rgb_subtraction
+2025-07-23 11:22:54,139 - INFO - Video analysis progress: 24.0%
+2025-07-23 11:22:54,242 - INFO - Video analysis progress: 48.0%
+2025-07-23 11:22:54,355 - INFO - Video analysis progress: 72.0%
+2025-07-23 11:22:54,461 - INFO - Video analysis progress: 96.0%
+2025-07-23 11:22:54,487 - INFO - Target 1: Trying strategy 3/4 - hsv_subtraction
+2025-07-23 11:22:54,617 - INFO - Video analysis progress: 24.0%
+2025-07-23 11:22:54,722 - INFO - Video analysis progress: 48.0%
+2025-07-23 11:22:54,838 - INFO - Video analysis progress: 72.0%
+2025-07-23 11:22:54,925 - INFO - Video analysis progress: 96.0%
+2025-07-23 11:22:54,947 - INFO - Target 1: Trying strategy 4/4 - hsv_direct
+2025-07-23 11:22:55,057 - INFO - Video analysis progress: 24.0%
+2025-07-23 11:22:55,175 - INFO - Video analysis progress: 48.0%
+2025-07-23 11:22:55,294 - INFO - Video analysis progress: 72.0%
+2025-07-23 11:22:55,408 - INFO - Video analysis progress: 96.0%
+2025-07-23 11:22:55,424 - INFO - Target 1: Final result - 0 shots detected
+2025-07-23 11:22:55,424 - INFO - Shot detection completed. Found 0 shots total
+2025-07-23 11:22:55,424 - INFO - Video analysis completed successfully: Analysis complete. Found 0 shots
+2025-07-23 11:22:55,425 - INFO - Video analysis completed successfully. Detected 0 shots
+2025-07-23 11:43:35,553 - INFO - Application terminated
+2025-07-23 13:06:04,113 - INFO - Navigated to starting menu
+2025-07-23 13:06:04,115 - INFO - Application initialized successfully
+2025-07-23 13:06:04,116 - INFO - Starting application main loop
+2025-07-23 13:06:07,887 - INFO - Iniciar button clicked
+2025-07-23 13:06:07,888 - INFO - Iniciar button clicked
+2025-07-23 13:06:24,082 - INFO - Camera initialized successfully
+2025-07-23 13:06:24,645 - INFO - Calibration started successfully
+2025-07-23 13:06:24,646 - INFO - Navigated to calibration view
+2025-07-23 13:06:44,094 - INFO - Calibration parameters saved successfully to data\calibration_data.json
+2025-07-23 13:06:44,094 - INFO - Targets: 1, Expected blobs: 4, Detected blobs: 4
+2025-07-23 13:06:44,114 - INFO - Calculated homography for target 1
+2025-07-23 13:06:44,114 - INFO -   Camera points: [[236.0, 214.0], [332.0, 213.0], [329.0, 112.0], [234.0, 111.0]]
+2025-07-23 13:06:44,115 - INFO - Homographies saved to: data\homographies.json
+2025-07-23 13:06:44,116 - INFO - Homographies calculated and saved successfully
+2025-07-23 13:06:44,450 - INFO - Calibration stopped
+2025-07-23 13:07:02,189 - INFO - Camera initialized successfully
+2025-07-23 13:07:02,661 - INFO - Simulation started successfully
+2025-07-23 13:07:02,661 - INFO - Navigated to simulation view
+2025-07-23 13:07:14,910 - INFO - Started recording to: Video\shooting_20250723_130714.mp4
+2025-07-23 13:07:20,364 - INFO - Recording stopped. Saved 78 frames to: Video\shooting_20250723_130714.mp4
+2025-07-23 13:07:20,365 - INFO - Recording duration: 5.45 seconds
+2025-07-23 13:07:20,366 - INFO - Starting automatic video analysis...
+2025-07-23 13:07:20,367 - INFO - Starting async video analysis for: Video\shooting_20250723_130714.mp4
+2025-07-23 13:07:20,385 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 13:07:20,386 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_130714.mp4
+2025-07-23 13:07:20,406 - INFO - Loaded 1 homographies from file
+2025-07-23 13:07:20,458 - INFO - Analysing target 1 strategy 1/5: rgb_enhanced
+2025-07-23 13:07:20,641 - INFO - Video analysis progress: 38.5%
+2025-07-23 13:07:20,790 - INFO - Video analysis progress: 76.9%
+2025-07-23 13:07:20,873 - INFO - Analysing target 1 strategy 1/5: 0 shots found
+2025-07-23 13:07:20,873 - INFO - Analysing target 1 strategy 2/5: rgb_subtraction
+2025-07-23 13:07:21,125 - INFO - Video analysis progress: 38.5%
+2025-07-23 13:07:21,322 - INFO - Video analysis progress: 76.9%
+2025-07-23 13:07:21,540 - INFO - Analysing target 1 strategy 2/5: 0 shots found
+2025-07-23 13:07:21,540 - INFO - Analysing target 1 strategy 3/5: hsv_subtraction
+2025-07-23 13:07:21,672 - INFO - Video analysis progress: 38.5%
+2025-07-23 13:07:21,781 - INFO - Video analysis progress: 76.9%
+2025-07-23 13:07:21,854 - INFO - Analysing target 1 strategy 3/5: 0 shots found
+2025-07-23 13:07:21,855 - INFO - Analysing target 1 strategy 4/5: hsv_direct
+2025-07-23 13:07:22,002 - INFO - Video analysis progress: 38.5%
+2025-07-23 13:07:22,136 - INFO - Video analysis progress: 76.9%
+2025-07-23 13:07:22,216 - INFO - Analysing target 1 strategy 4/5: 0 shots found
+2025-07-23 13:07:22,218 - INFO - Analysing target 1 strategy 5/5: frame_difference
+2025-07-23 13:07:22,375 - INFO - Video analysis progress: 38.5%
+2025-07-23 13:07:22,480 - INFO - Video analysis progress: 76.9%
+2025-07-23 13:07:22,543 - INFO - Analysing target 1 strategy 5/5: 4 shots found
+2025-07-23 13:07:22,555 - INFO - Detection data saved
+2025-07-23 13:07:22,557 - INFO - Shot 1: camera(277.0, 125.5) -> target(133, 258)
+2025-07-23 13:07:22,557 - INFO - Shot 2: camera(304.1, 211.5) -> target(211, 5)
+2025-07-23 13:07:22,558 - INFO - Shot 3: camera(277.2, 140.2) -> target(132, 214)
+2025-07-23 13:07:22,558 - INFO - Shot 4: camera(297.5, 213.4) -> target(190, 0)
+2025-07-23 13:07:22,570 - INFO - Result image saved: Video\target_1_result_20250723_130722.jpg
+2025-07-23 13:07:22,571 - INFO - Video analysis completed successfully: Analysis complete. Found 4 shots
+2025-07-23 13:07:22,571 - INFO - Video analysis completed successfully. Detected 4 shots
+2025-07-23 13:10:11,087 - INFO - Application terminated
+2025-07-23 13:11:50,478 - INFO - Navigated to starting menu
+2025-07-23 13:11:50,479 - INFO - Application initialized successfully
+2025-07-23 13:11:50,479 - INFO - Starting application main loop
+2025-07-23 13:11:53,632 - INFO - Iniciar button clicked
+2025-07-23 13:11:53,633 - INFO - Iniciar button clicked
+2025-07-23 13:11:56,796 - INFO - Camera initialized successfully
+2025-07-23 13:11:58,178 - INFO - Calibration started successfully
+2025-07-23 13:11:58,179 - INFO - Navigated to calibration view
+2025-07-23 13:12:17,825 - INFO - Calibration parameters saved successfully to data\calibration_data.json
+2025-07-23 13:12:17,826 - INFO - Targets: 1, Expected blobs: 4, Detected blobs: 4
+2025-07-23 13:12:17,831 - INFO - Calculated homography for target 1
+2025-07-23 13:12:17,831 - INFO -   Camera points: [[359.0, 257.0], [259.0, 257.0], [357.0, 153.0], [261.0, 153.1]]
+2025-07-23 13:12:17,834 - INFO - Homographies saved to: data\homographies.json
+2025-07-23 13:12:17,835 - INFO - Homographies calculated and saved successfully
+2025-07-23 13:12:17,843 - INFO - Calibration stopped
+2025-07-23 13:12:21,781 - INFO - Camera initialized successfully
+2025-07-23 13:12:21,830 - INFO - Simulation started successfully
+2025-07-23 13:12:21,831 - INFO - Navigated to simulation view
+2025-07-23 13:12:23,689 - INFO - Started recording to: Video\shooting_20250723_131223.mp4
+2025-07-23 13:12:32,148 - INFO - Recording stopped. Saved 133 frames to: Video\shooting_20250723_131223.mp4
+2025-07-23 13:12:32,148 - INFO - Recording duration: 8.46 seconds
+2025-07-23 13:12:32,148 - INFO - Starting automatic video analysis...
+2025-07-23 13:12:32,149 - INFO - Starting async video analysis for: Video\shooting_20250723_131223.mp4
+2025-07-23 13:12:32,157 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 13:12:32,157 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_131223.mp4
+2025-07-23 13:12:32,173 - INFO - Loaded 1 homographies from file
+2025-07-23 13:12:32,189 - INFO - Analysing target 1 strategy 1/5: rgb_enhanced
+2025-07-23 13:12:32,325 - INFO - Video analysis progress: 22.6%
+2025-07-23 13:12:32,431 - INFO - Video analysis progress: 45.1%
+2025-07-23 13:12:32,527 - INFO - Video analysis progress: 67.7%
+2025-07-23 13:12:32,627 - INFO - Video analysis progress: 90.2%
+2025-07-23 13:12:32,684 - INFO - Analysing target 1 strategy 1/5: 0 shots found
+2025-07-23 13:12:32,684 - INFO - Analysing target 1 strategy 2/5: rgb_subtraction
+2025-07-23 13:12:32,900 - INFO - Video analysis progress: 22.6%
+2025-07-23 13:12:33,135 - INFO - Video analysis progress: 45.1%
+2025-07-23 13:12:33,374 - INFO - Video analysis progress: 67.7%
+2025-07-23 13:12:33,584 - INFO - Video analysis progress: 90.2%
+2025-07-23 13:12:33,695 - INFO - Analysing target 1 strategy 2/5: 0 shots found
+2025-07-23 13:12:33,695 - INFO - Analysing target 1 strategy 3/5: hsv_subtraction
+2025-07-23 13:12:33,820 - INFO - Video analysis progress: 22.6%
+2025-07-23 13:12:33,979 - INFO - Video analysis progress: 45.1%
+2025-07-23 13:12:34,212 - INFO - Video analysis progress: 67.7%
+2025-07-23 13:12:34,423 - INFO - Video analysis progress: 90.2%
+2025-07-23 13:12:34,519 - INFO - Analysing target 1 strategy 3/5: 0 shots found
+2025-07-23 13:12:34,519 - INFO - Analysing target 1 strategy 4/5: hsv_direct
+2025-07-23 13:12:34,610 - INFO - Video analysis progress: 22.6%
+2025-07-23 13:12:34,690 - INFO - Video analysis progress: 45.1%
+2025-07-23 13:12:34,771 - INFO - Video analysis progress: 67.7%
+2025-07-23 13:12:34,853 - INFO - Video analysis progress: 90.2%
+2025-07-23 13:12:34,893 - INFO - Analysing target 1 strategy 4/5: 0 shots found
+2025-07-23 13:12:34,894 - INFO - Analysing target 1 strategy 5/5: frame_difference
+2025-07-23 13:12:35,009 - INFO - Video analysis progress: 22.6%
+2025-07-23 13:12:35,090 - INFO - Video analysis progress: 45.1%
+2025-07-23 13:12:35,153 - INFO - Video analysis progress: 67.7%
+2025-07-23 13:12:35,167 - INFO - Analysing target 1 strategy 5/5: 5 shots found
+2025-07-23 13:12:35,170 - INFO - Detection data saved
+2025-07-23 13:12:35,171 - WARNING - Shot 1 outside image bounds: (177, 640)
+2025-07-23 13:12:35,172 - WARNING - Shot 2 outside image bounds: (228, -38)
+2025-07-23 13:12:35,172 - WARNING - Shot 3 outside image bounds: (327, 617)
+2025-07-23 13:12:35,172 - WARNING - Shot 4 outside image bounds: (111, -139)
+2025-07-23 13:12:35,172 - WARNING - Shot 5 outside image bounds: (107, -652)
+2025-07-23 13:12:35,178 - INFO - Result image saved: Video\target_1_result_20250723_131235.jpg
+2025-07-23 13:12:35,180 - INFO - Video analysis completed successfully: Analysis complete. Found 5 shots
+2025-07-23 13:12:35,181 - INFO - Video analysis completed successfully. Detected 5 shots
+2025-07-23 13:12:48,140 - INFO - Started recording to: Video\shooting_20250723_131248.mp4
+2025-07-23 13:12:57,816 - INFO - Recording stopped. Saved 145 frames to: Video\shooting_20250723_131248.mp4
+2025-07-23 13:12:57,816 - INFO - Recording duration: 9.67 seconds
+2025-07-23 13:12:57,816 - INFO - Starting automatic video analysis...
+2025-07-23 13:12:57,817 - INFO - Starting async video analysis for: Video\shooting_20250723_131248.mp4
+2025-07-23 13:12:57,819 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 13:12:57,819 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_131248.mp4
+2025-07-23 13:12:57,819 - INFO - Loaded 1 homographies from file
+2025-07-23 13:12:57,828 - INFO - Analysing target 1 strategy 1/5: rgb_enhanced
+2025-07-23 13:12:57,943 - INFO - Video analysis progress: 20.7%
+2025-07-23 13:12:58,042 - INFO - Video analysis progress: 41.4%
+2025-07-23 13:12:58,140 - INFO - Video analysis progress: 62.1%
+2025-07-23 13:12:58,227 - INFO - Video analysis progress: 82.8%
+2025-07-23 13:12:58,301 - INFO - Analysing target 1 strategy 1/5: 0 shots found
+2025-07-23 13:12:58,301 - INFO - Analysing target 1 strategy 2/5: rgb_subtraction
+2025-07-23 13:12:58,505 - INFO - Video analysis progress: 20.7%
+2025-07-23 13:12:58,702 - INFO - Video analysis progress: 41.4%
+2025-07-23 13:12:58,930 - INFO - Video analysis progress: 62.1%
+2025-07-23 13:12:59,134 - INFO - Video analysis progress: 82.8%
+2025-07-23 13:12:59,299 - INFO - Analysing target 1 strategy 2/5: 0 shots found
+2025-07-23 13:12:59,300 - INFO - Analysing target 1 strategy 3/5: hsv_subtraction
+2025-07-23 13:12:59,422 - INFO - Video analysis progress: 20.7%
+2025-07-23 13:12:59,544 - INFO - Video analysis progress: 41.4%
+2025-07-23 13:12:59,669 - INFO - Video analysis progress: 62.1%
+2025-07-23 13:12:59,787 - INFO - Video analysis progress: 82.8%
+2025-07-23 13:12:59,894 - INFO - Analysing target 1 strategy 3/5: 0 shots found
+2025-07-23 13:12:59,894 - INFO - Analysing target 1 strategy 4/5: hsv_direct
+2025-07-23 13:12:59,978 - INFO - Video analysis progress: 20.7%
+2025-07-23 13:13:00,071 - INFO - Video analysis progress: 41.4%
+2025-07-23 13:13:00,163 - INFO - Video analysis progress: 62.1%
+2025-07-23 13:13:00,247 - INFO - Video analysis progress: 82.8%
+2025-07-23 13:13:00,307 - INFO - Started recording to: Video\shooting_20250723_131300.mp4
+2025-07-23 13:13:00,326 - INFO - Analysing target 1 strategy 4/5: 0 shots found
+2025-07-23 13:13:00,326 - INFO - Analysing target 1 strategy 5/5: frame_difference
+2025-07-23 13:13:00,401 - INFO - Video analysis progress: 20.7%
+2025-07-23 13:13:00,478 - INFO - Video analysis progress: 41.4%
+2025-07-23 13:13:00,548 - INFO - Video analysis progress: 62.1%
+2025-07-23 13:13:00,600 - INFO - Video analysis progress: 82.8%
+2025-07-23 13:13:00,666 - INFO - Analysing target 1 strategy 5/5: 4 shots found
+2025-07-23 13:13:00,671 - INFO - Detection data saved
+2025-07-23 13:13:00,672 - WARNING - Shot 1 outside image bounds: (111, 414)
+2025-07-23 13:13:00,673 - WARNING - Shot 2 outside image bounds: (179, 345)
+2025-07-23 13:13:00,673 - WARNING - Shot 3 outside image bounds: (112, 442)
+2025-07-23 13:13:00,673 - WARNING - Shot 4 outside image bounds: (79, 571)
+2025-07-23 13:13:00,674 - INFO - Result image saved: Video\target_1_result_20250723_131300.jpg
+2025-07-23 13:13:00,675 - INFO - Video analysis completed successfully: Analysis complete. Found 4 shots
+2025-07-23 13:13:00,675 - INFO - Video analysis completed successfully. Detected 4 shots
+2025-07-23 13:13:07,667 - INFO - Recording stopped. Saved 118 frames to: Video\shooting_20250723_131300.mp4
+2025-07-23 13:13:07,668 - INFO - Recording duration: 7.36 seconds
+2025-07-23 13:13:07,668 - INFO - Starting automatic video analysis...
+2025-07-23 13:13:07,668 - INFO - Starting async video analysis for: Video\shooting_20250723_131300.mp4
+2025-07-23 13:13:07,669 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 13:13:07,670 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_131300.mp4
+2025-07-23 13:13:07,671 - INFO - Loaded 1 homographies from file
+2025-07-23 13:13:07,682 - INFO - Analysing target 1 strategy 1/5: rgb_enhanced
+2025-07-23 13:13:07,789 - INFO - Video analysis progress: 25.4%
+2025-07-23 13:13:07,888 - INFO - Video analysis progress: 50.8%
+2025-07-23 13:13:07,977 - INFO - Video analysis progress: 76.3%
+2025-07-23 13:13:08,053 - INFO - Analysing target 1 strategy 1/5: 0 shots found
+2025-07-23 13:13:08,053 - INFO - Analysing target 1 strategy 2/5: rgb_subtraction
+2025-07-23 13:13:08,201 - INFO - Video analysis progress: 25.4%
+2025-07-23 13:13:08,388 - INFO - Video analysis progress: 50.8%
+2025-07-23 13:13:08,583 - INFO - Video analysis progress: 76.3%
+2025-07-23 13:13:08,755 - INFO - Analysing target 1 strategy 2/5: 0 shots found
+2025-07-23 13:13:08,756 - INFO - Analysing target 1 strategy 3/5: hsv_subtraction
+2025-07-23 13:13:08,886 - INFO - Video analysis progress: 25.4%
+2025-07-23 13:13:09,011 - INFO - Video analysis progress: 50.8%
+2025-07-23 13:13:09,125 - INFO - Video analysis progress: 76.3%
+2025-07-23 13:13:09,240 - INFO - Analysing target 1 strategy 3/5: 0 shots found
+2025-07-23 13:13:09,240 - INFO - Analysing target 1 strategy 4/5: hsv_direct
+2025-07-23 13:13:09,330 - INFO - Video analysis progress: 25.4%
+2025-07-23 13:13:09,402 - INFO - Video analysis progress: 50.8%
+2025-07-23 13:13:09,492 - INFO - Video analysis progress: 76.3%
+2025-07-23 13:13:09,575 - INFO - Analysing target 1 strategy 4/5: 0 shots found
+2025-07-23 13:13:09,575 - INFO - Analysing target 1 strategy 5/5: frame_difference
+2025-07-23 13:13:09,633 - INFO - Video analysis progress: 25.4%
+2025-07-23 13:13:09,711 - INFO - Video analysis progress: 50.8%
+2025-07-23 13:13:09,790 - INFO - Video analysis progress: 76.3%
+2025-07-23 13:13:09,839 - INFO - Analysing target 1 strategy 5/5: 4 shots found
+2025-07-23 13:13:09,843 - INFO - Detection data saved
+2025-07-23 13:13:09,844 - WARNING - Shot 1 outside image bounds: (96, -34)
+2025-07-23 13:13:09,844 - WARNING - Shot 2 outside image bounds: (31, 495)
+2025-07-23 13:13:09,844 - WARNING - Shot 3 outside image bounds: (108, 398)
+2025-07-23 13:13:09,844 - WARNING - Shot 4 outside image bounds: (290, 889)
+2025-07-23 13:13:09,850 - INFO - Result image saved: Video\target_1_result_20250723_131309.jpg
+2025-07-23 13:13:09,851 - INFO - Video analysis completed successfully: Analysis complete. Found 4 shots
+2025-07-23 13:13:09,852 - INFO - Video analysis completed successfully. Detected 4 shots
+2025-07-23 13:13:20,800 - INFO - Started recording to: Video\shooting_20250723_131320.mp4
+2025-07-23 13:13:26,642 - INFO - Recording stopped. Saved 92 frames to: Video\shooting_20250723_131320.mp4
+2025-07-23 13:13:26,642 - INFO - Recording duration: 5.84 seconds
+2025-07-23 13:13:26,643 - INFO - Starting automatic video analysis...
+2025-07-23 13:13:26,643 - INFO - Starting async video analysis for: Video\shooting_20250723_131320.mp4
+2025-07-23 13:13:26,645 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 13:13:26,646 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_131320.mp4
+2025-07-23 13:13:26,647 - INFO - Loaded 1 homographies from file
+2025-07-23 13:13:26,657 - INFO - Analysing target 1 strategy 1/5: rgb_enhanced
+2025-07-23 13:13:26,768 - INFO - Video analysis progress: 32.6%
+2025-07-23 13:13:26,878 - INFO - Video analysis progress: 65.2%
+2025-07-23 13:13:26,960 - INFO - Video analysis progress: 97.8%
+2025-07-23 13:13:26,964 - INFO - Analysing target 1 strategy 1/5: 0 shots found
+2025-07-23 13:13:26,964 - INFO - Analysing target 1 strategy 2/5: rgb_subtraction
+2025-07-23 13:13:27,131 - INFO - Video analysis progress: 32.6%
+2025-07-23 13:13:27,335 - INFO - Video analysis progress: 65.2%
+2025-07-23 13:13:27,506 - INFO - Video analysis progress: 97.8%
+2025-07-23 13:13:27,515 - INFO - Analysing target 1 strategy 2/5: 0 shots found
+2025-07-23 13:13:27,515 - INFO - Analysing target 1 strategy 3/5: hsv_subtraction
+2025-07-23 13:13:27,638 - INFO - Video analysis progress: 32.6%
+2025-07-23 13:13:27,773 - INFO - Video analysis progress: 65.2%
+2025-07-23 13:13:27,902 - INFO - Video analysis progress: 97.8%
+2025-07-23 13:13:27,909 - INFO - Analysing target 1 strategy 3/5: 0 shots found
+2025-07-23 13:13:27,910 - INFO - Analysing target 1 strategy 4/5: hsv_direct
+2025-07-23 13:13:27,998 - INFO - Video analysis progress: 32.6%
+2025-07-23 13:13:28,068 - INFO - Video analysis progress: 65.2%
+2025-07-23 13:13:28,157 - INFO - Video analysis progress: 97.8%
+2025-07-23 13:13:28,162 - INFO - Analysing target 1 strategy 4/5: 0 shots found
+2025-07-23 13:13:28,163 - INFO - Analysing target 1 strategy 5/5: frame_difference
+2025-07-23 13:13:28,229 - INFO - Video analysis progress: 32.6%
+2025-07-23 13:13:28,313 - INFO - Video analysis progress: 65.2%
+2025-07-23 13:13:28,401 - INFO - Video analysis progress: 97.8%
+2025-07-23 13:13:28,405 - INFO - Analysing target 1 strategy 5/5: 3 shots found
+2025-07-23 13:13:28,409 - INFO - Detection data saved
+2025-07-23 13:13:28,410 - WARNING - Shot 1 outside image bounds: (169, -3)
+2025-07-23 13:13:28,411 - WARNING - Shot 2 outside image bounds: (185, 340)
+2025-07-23 13:13:28,411 - WARNING - Shot 3 outside image bounds: (186, 341)
+2025-07-23 13:13:28,413 - INFO - Result image saved: Video\target_1_result_20250723_131328.jpg
+2025-07-23 13:13:28,414 - INFO - Video analysis completed successfully: Analysis complete. Found 3 shots
+2025-07-23 13:13:28,414 - INFO - Video analysis completed successfully. Detected 3 shots
+2025-07-23 13:13:31,938 - INFO - Started recording to: Video\shooting_20250723_131331.mp4
+2025-07-23 13:13:36,718 - INFO - Recording stopped. Saved 77 frames to: Video\shooting_20250723_131331.mp4
+2025-07-23 13:13:36,719 - INFO - Recording duration: 4.78 seconds
+2025-07-23 13:13:36,720 - INFO - Starting automatic video analysis...
+2025-07-23 13:13:36,720 - INFO - Starting async video analysis for: Video\shooting_20250723_131331.mp4
+2025-07-23 13:13:36,722 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 13:13:36,723 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_131331.mp4
+2025-07-23 13:13:36,724 - INFO - Loaded 1 homographies from file
+2025-07-23 13:13:36,747 - INFO - Analysing target 1 strategy 1/5: rgb_enhanced
+2025-07-23 13:13:36,847 - INFO - Video analysis progress: 39.0%
+2025-07-23 13:13:36,951 - INFO - Video analysis progress: 77.9%
+2025-07-23 13:13:37,005 - INFO - Analysing target 1 strategy 1/5: 0 shots found
+2025-07-23 13:13:37,007 - INFO - Analysing target 1 strategy 2/5: rgb_subtraction
+2025-07-23 13:13:37,167 - INFO - Video analysis progress: 39.0%
+2025-07-23 13:13:37,343 - INFO - Video analysis progress: 77.9%
+2025-07-23 13:13:37,481 - INFO - Analysing target 1 strategy 2/5: 0 shots found
+2025-07-23 13:13:37,481 - INFO - Analysing target 1 strategy 3/5: hsv_subtraction
+2025-07-23 13:13:37,599 - INFO - Video analysis progress: 39.0%
+2025-07-23 13:13:37,721 - INFO - Video analysis progress: 77.9%
+2025-07-23 13:13:37,800 - INFO - Analysing target 1 strategy 3/5: 0 shots found
+2025-07-23 13:13:37,800 - INFO - Analysing target 1 strategy 4/5: hsv_direct
+2025-07-23 13:13:37,902 - INFO - Video analysis progress: 39.0%
+2025-07-23 13:13:37,987 - INFO - Video analysis progress: 77.9%
+2025-07-23 13:13:38,031 - INFO - Analysing target 1 strategy 4/5: 0 shots found
+2025-07-23 13:13:38,031 - INFO - Analysing target 1 strategy 5/5: frame_difference
+2025-07-23 13:13:38,117 - INFO - Video analysis progress: 39.0%
+2025-07-23 13:13:38,180 - INFO - Video analysis progress: 77.9%
+2025-07-23 13:13:38,222 - INFO - Analysing target 1 strategy 5/5: 2 shots found
+2025-07-23 13:13:38,226 - INFO - Detection data saved
+2025-07-23 13:13:38,227 - WARNING - Shot 1 outside image bounds: (100, -1245)
+2025-07-23 13:13:38,227 - WARNING - Shot 2 outside image bounds: (158, -107)
+2025-07-23 13:13:38,230 - INFO - Result image saved: Video\target_1_result_20250723_131338.jpg
+2025-07-23 13:13:38,232 - INFO - Video analysis completed successfully: Analysis complete. Found 2 shots
+2025-07-23 13:13:38,233 - INFO - Video analysis completed successfully. Detected 2 shots
+2025-07-23 13:13:42,767 - INFO - Started recording to: Video\shooting_20250723_131342.mp4
+2025-07-23 13:13:48,906 - INFO - Recording stopped. Saved 97 frames to: Video\shooting_20250723_131342.mp4
+2025-07-23 13:13:48,907 - INFO - Recording duration: 6.14 seconds
+2025-07-23 13:13:48,907 - INFO - Starting automatic video analysis...
+2025-07-23 13:13:48,908 - INFO - Starting async video analysis for: Video\shooting_20250723_131342.mp4
+2025-07-23 13:13:48,909 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 13:13:48,909 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_131342.mp4
+2025-07-23 13:13:48,909 - INFO - Loaded 1 homographies from file
+2025-07-23 13:13:48,921 - INFO - Analysing target 1 strategy 1/5: rgb_enhanced
+2025-07-23 13:13:49,024 - INFO - Video analysis progress: 30.9%
+2025-07-23 13:13:49,123 - INFO - Video analysis progress: 61.9%
+2025-07-23 13:13:49,223 - INFO - Video analysis progress: 92.8%
+2025-07-23 13:13:49,237 - INFO - Analysing target 1 strategy 1/5: 0 shots found
+2025-07-23 13:13:49,237 - INFO - Analysing target 1 strategy 2/5: rgb_subtraction
+2025-07-23 13:13:49,407 - INFO - Video analysis progress: 30.9%
+2025-07-23 13:13:49,614 - INFO - Video analysis progress: 61.9%
+2025-07-23 13:13:49,895 - INFO - Video analysis progress: 92.8%
+2025-07-23 13:13:50,092 - INFO - Analysing target 1 strategy 2/5: 0 shots found
+2025-07-23 13:13:50,179 - INFO - Analysing target 1 strategy 3/5: hsv_subtraction
+2025-07-23 13:13:50,421 - INFO - Video analysis progress: 30.9%
+2025-07-23 13:13:50,626 - INFO - Video analysis progress: 61.9%
+2025-07-23 13:13:50,796 - INFO - Video analysis progress: 92.8%
+2025-07-23 13:13:50,824 - INFO - Analysing target 1 strategy 3/5: 0 shots found
+2025-07-23 13:13:50,824 - INFO - Analysing target 1 strategy 4/5: hsv_direct
+2025-07-23 13:13:50,928 - INFO - Video analysis progress: 30.9%
+2025-07-23 13:13:51,013 - INFO - Video analysis progress: 61.9%
+2025-07-23 13:13:51,120 - INFO - Video analysis progress: 92.8%
+2025-07-23 13:13:51,135 - INFO - Analysing target 1 strategy 4/5: 0 shots found
+2025-07-23 13:13:51,136 - INFO - Analysing target 1 strategy 5/5: frame_difference
+2025-07-23 13:13:51,233 - INFO - Video analysis progress: 30.9%
+2025-07-23 13:13:51,322 - INFO - Video analysis progress: 61.9%
+2025-07-23 13:13:51,363 - INFO - Analysing target 1 strategy 5/5: 5 shots found
+2025-07-23 13:13:51,373 - INFO - Detection data saved
+2025-07-23 13:13:51,376 - WARNING - Shot 1 outside image bounds: (96, -11)
+2025-07-23 13:13:51,376 - WARNING - Shot 2 outside image bounds: (172, 383)
+2025-07-23 13:13:51,376 - WARNING - Shot 3 outside image bounds: (134, -12)
+2025-07-23 13:13:51,376 - WARNING - Shot 4 outside image bounds: (95, -9)
+2025-07-23 13:13:51,376 - WARNING - Shot 5 outside image bounds: (62, 778)
+2025-07-23 13:13:51,378 - INFO - Result image saved: Video\target_1_result_20250723_131351.jpg
+2025-07-23 13:13:51,379 - INFO - Video analysis completed successfully: Analysis complete. Found 5 shots
+2025-07-23 13:13:51,379 - INFO - Video analysis completed successfully. Detected 5 shots
+2025-07-23 13:14:38,582 - INFO - Started recording to: Video\shooting_20250723_131438.mp4
+2025-07-23 13:14:42,999 - INFO - Recording stopped. Saved 70 frames to: Video\shooting_20250723_131438.mp4
+2025-07-23 13:14:42,999 - INFO - Recording duration: 4.42 seconds
+2025-07-23 13:14:42,999 - INFO - Starting automatic video analysis...
+2025-07-23 13:14:43,000 - INFO - Starting async video analysis for: Video\shooting_20250723_131438.mp4
+2025-07-23 13:14:43,001 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 13:14:43,001 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_131438.mp4
+2025-07-23 13:14:43,002 - INFO - Loaded 1 homographies from file
+2025-07-23 13:14:43,011 - INFO - Analysing target 1 strategy 1/5: rgb_enhanced
+2025-07-23 13:14:43,148 - INFO - Video analysis progress: 42.9%
+2025-07-23 13:14:43,250 - INFO - Video analysis progress: 85.7%
+2025-07-23 13:14:43,277 - INFO - Analysing target 1 strategy 1/5: 0 shots found
+2025-07-23 13:14:43,278 - INFO - Analysing target 1 strategy 2/5: rgb_subtraction
+2025-07-23 13:14:43,486 - INFO - Video analysis progress: 42.9%
+2025-07-23 13:14:43,695 - INFO - Video analysis progress: 85.7%
+2025-07-23 13:14:43,786 - INFO - Analysing target 1 strategy 2/5: 0 shots found
+2025-07-23 13:14:43,787 - INFO - Analysing target 1 strategy 3/5: hsv_subtraction
+2025-07-23 13:14:43,898 - INFO - Video analysis progress: 42.9%
+2025-07-23 13:14:44,014 - INFO - Video analysis progress: 85.7%
+2025-07-23 13:14:44,052 - INFO - Analysing target 1 strategy 3/5: 0 shots found
+2025-07-23 13:14:44,052 - INFO - Analysing target 1 strategy 4/5: hsv_direct
+2025-07-23 13:14:44,160 - INFO - Video analysis progress: 42.9%
+2025-07-23 13:14:44,194 - INFO - Analysing target 1 strategy 4/5: 5 shots found
+2025-07-23 13:14:44,202 - INFO - Detection data saved
+2025-07-23 13:14:44,203 - WARNING - Shot 1 outside image bounds: (179, 1460)
+2025-07-23 13:14:44,203 - WARNING - Shot 2 outside image bounds: (192, 963)
+2025-07-23 13:14:44,204 - WARNING - Shot 3 outside image bounds: (297, 2294)
+2025-07-23 13:14:44,204 - WARNING - Shot 4 outside image bounds: (277, 2155)
+2025-07-23 13:14:44,204 - WARNING - Shot 5 outside image bounds: (311, 2397)
+2025-07-23 13:14:44,205 - INFO - Result image saved: Video\target_1_result_20250723_131444.jpg
+2025-07-23 13:14:44,206 - INFO - Video analysis completed successfully: Analysis complete. Found 5 shots
+2025-07-23 13:14:44,206 - INFO - Video analysis completed successfully. Detected 5 shots
+2025-07-23 13:14:46,356 - INFO - Started recording to: Video\shooting_20250723_131446.mp4
+2025-07-23 13:14:51,420 - INFO - Recording stopped. Saved 80 frames to: Video\shooting_20250723_131446.mp4
+2025-07-23 13:14:51,420 - INFO - Recording duration: 5.06 seconds
+2025-07-23 13:14:51,420 - INFO - Starting automatic video analysis...
+2025-07-23 13:14:51,420 - INFO - Starting async video analysis for: Video\shooting_20250723_131446.mp4
+2025-07-23 13:14:51,421 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 13:14:51,422 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_131446.mp4
+2025-07-23 13:14:51,422 - INFO - Loaded 1 homographies from file
+2025-07-23 13:14:51,431 - INFO - Analysing target 1 strategy 1/5: rgb_enhanced
+2025-07-23 13:14:51,557 - INFO - Video analysis progress: 37.5%
+2025-07-23 13:14:51,672 - INFO - Video analysis progress: 75.0%
+2025-07-23 13:14:51,750 - INFO - Analysing target 1 strategy 1/5: 0 shots found
+2025-07-23 13:14:51,751 - INFO - Analysing target 1 strategy 2/5: rgb_subtraction
+2025-07-23 13:14:51,971 - INFO - Video analysis progress: 37.5%
+2025-07-23 13:14:52,177 - INFO - Video analysis progress: 75.0%
+2025-07-23 13:14:52,325 - INFO - Analysing target 1 strategy 2/5: 0 shots found
+2025-07-23 13:14:52,326 - INFO - Analysing target 1 strategy 3/5: hsv_subtraction
+2025-07-23 13:14:52,450 - INFO - Video analysis progress: 37.5%
+2025-07-23 13:14:52,594 - INFO - Video analysis progress: 75.0%
+2025-07-23 13:14:52,690 - INFO - Analysing target 1 strategy 3/5: 0 shots found
+2025-07-23 13:14:52,691 - INFO - Analysing target 1 strategy 4/5: hsv_direct
+2025-07-23 13:14:52,781 - INFO - Started recording to: Video\shooting_20250723_131452.mp4
+2025-07-23 13:14:52,790 - INFO - Video analysis progress: 37.5%
+2025-07-23 13:14:52,886 - INFO - Analysing target 1 strategy 4/5: 5 shots found
+2025-07-23 13:14:52,890 - INFO - Detection data saved
+2025-07-23 13:14:52,891 - WARNING - Shot 1 outside image bounds: (9, -395)
+2025-07-23 13:14:52,891 - WARNING - Shot 2 outside image bounds: (10, -374)
+2025-07-23 13:14:52,892 - WARNING - Shot 3 outside image bounds: (2, -428)
+2025-07-23 13:14:52,892 - WARNING - Shot 4 outside image bounds: (109, -180)
+2025-07-23 13:14:52,892 - WARNING - Shot 5 outside image bounds: (98, -184)
+2025-07-23 13:14:52,893 - INFO - Result image saved: Video\target_1_result_20250723_131452.jpg
+2025-07-23 13:14:52,893 - INFO - Video analysis completed successfully: Analysis complete. Found 5 shots
+2025-07-23 13:14:52,893 - INFO - Video analysis completed successfully. Detected 5 shots
+2025-07-23 13:14:58,746 - INFO - Recording stopped. Saved 94 frames to: Video\shooting_20250723_131452.mp4
+2025-07-23 13:14:58,746 - INFO - Recording duration: 5.97 seconds
+2025-07-23 13:14:58,747 - INFO - Starting automatic video analysis...
+2025-07-23 13:14:58,747 - INFO - Starting async video analysis for: Video\shooting_20250723_131452.mp4
+2025-07-23 13:14:58,748 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 13:14:58,749 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_131452.mp4
+2025-07-23 13:14:58,749 - INFO - Loaded 1 homographies from file
+2025-07-23 13:14:58,760 - INFO - Analysing target 1 strategy 1/5: rgb_enhanced
+2025-07-23 13:14:58,889 - INFO - Video analysis progress: 31.9%
+2025-07-23 13:14:59,017 - INFO - Video analysis progress: 63.8%
+2025-07-23 13:14:59,113 - INFO - Video analysis progress: 95.7%
+2025-07-23 13:14:59,120 - INFO - Analysing target 1 strategy 1/5: 0 shots found
+2025-07-23 13:14:59,121 - INFO - Analysing target 1 strategy 2/5: rgb_subtraction
+2025-07-23 13:14:59,329 - INFO - Video analysis progress: 31.9%
+2025-07-23 13:14:59,546 - INFO - Video analysis progress: 63.8%
+2025-07-23 13:14:59,763 - INFO - Video analysis progress: 95.7%
+2025-07-23 13:14:59,810 - INFO - Analysing target 1 strategy 2/5: 0 shots found
+2025-07-23 13:14:59,811 - INFO - Analysing target 1 strategy 3/5: hsv_subtraction
+2025-07-23 13:14:59,954 - INFO - Video analysis progress: 31.9%
+2025-07-23 13:15:00,088 - INFO - Video analysis progress: 63.8%
+2025-07-23 13:15:00,211 - INFO - Video analysis progress: 95.7%
+2025-07-23 13:15:00,225 - INFO - Analysing target 1 strategy 3/5: 0 shots found
+2025-07-23 13:15:00,225 - INFO - Analysing target 1 strategy 4/5: hsv_direct
+2025-07-23 13:15:00,315 - INFO - Video analysis progress: 31.9%
+2025-07-23 13:15:00,324 - INFO - Analysing target 1 strategy 4/5: 5 shots found
+2025-07-23 13:15:00,329 - INFO - Detection data saved
+2025-07-23 13:15:00,330 - WARNING - Shot 1 outside image bounds: (145, 655)
+2025-07-23 13:15:00,330 - WARNING - Shot 2 outside image bounds: (154, 667)
+2025-07-23 13:15:00,331 - WARNING - Shot 3 outside image bounds: (165, 610)
+2025-07-23 13:15:00,331 - WARNING - Shot 4 outside image bounds: (158, 591)
+2025-07-23 13:15:00,331 - WARNING - Shot 5 outside image bounds: (222, 866)
+2025-07-23 13:15:00,337 - INFO - Result image saved: Video\target_1_result_20250723_131500.jpg
+2025-07-23 13:15:00,338 - INFO - Video analysis completed successfully: Analysis complete. Found 5 shots
+2025-07-23 13:15:00,339 - INFO - Video analysis completed successfully. Detected 5 shots
+2025-07-23 13:15:00,675 - INFO - Started recording to: Video\shooting_20250723_131500.mp4
+2025-07-23 13:15:05,833 - INFO - Recording stopped. Saved 83 frames to: Video\shooting_20250723_131500.mp4
+2025-07-23 13:15:05,833 - INFO - Recording duration: 5.16 seconds
+2025-07-23 13:15:05,833 - INFO - Starting automatic video analysis...
+2025-07-23 13:15:05,834 - INFO - Starting async video analysis for: Video\shooting_20250723_131500.mp4
+2025-07-23 13:15:05,835 - INFO - Analyzing video with 1 targets, 4 blob positions
+2025-07-23 13:15:05,835 - INFO - Starting shot detection analysis for video: Video\shooting_20250723_131500.mp4
+2025-07-23 13:15:05,836 - INFO - Loaded 1 homographies from file
+2025-07-23 13:15:05,844 - INFO - Analysing target 1 strategy 1/5: rgb_enhanced
+2025-07-23 13:15:05,952 - INFO - Video analysis progress: 36.1%
+2025-07-23 13:15:06,057 - INFO - Video analysis progress: 72.3%
+2025-07-23 13:15:06,141 - INFO - Analysing target 1 strategy 1/5: 0 shots found
+2025-07-23 13:15:06,142 - INFO - Analysing target 1 strategy 2/5: rgb_subtraction
+2025-07-23 13:15:06,343 - INFO - Video analysis progress: 36.1%
+2025-07-23 13:15:06,558 - INFO - Video analysis progress: 72.3%
+2025-07-23 13:15:06,732 - INFO - Analysing target 1 strategy 2/5: 0 shots found
+2025-07-23 13:15:06,733 - INFO - Analysing target 1 strategy 3/5: hsv_subtraction
+2025-07-23 13:15:06,852 - INFO - Video analysis progress: 36.1%
+2025-07-23 13:15:06,987 - INFO - Video analysis progress: 72.3%
+2025-07-23 13:15:07,094 - INFO - Analysing target 1 strategy 3/5: 0 shots found
+2025-07-23 13:15:07,094 - INFO - Analysing target 1 strategy 4/5: hsv_direct
+2025-07-23 13:15:07,181 - INFO - Analysing target 1 strategy 4/5: 5 shots found
+2025-07-23 13:15:07,186 - INFO - Detection data saved
+2025-07-23 13:15:07,187 - WARNING - Shot 1 outside image bounds: (144, 425)
+2025-07-23 13:15:07,187 - WARNING - Shot 2 outside image bounds: (146, 427)
+2025-07-23 13:15:07,187 - WARNING - Shot 3 outside image bounds: (151, 432)
+2025-07-23 13:15:07,187 - WARNING - Shot 4 outside image bounds: (158, 416)
+2025-07-23 13:15:07,187 - WARNING - Shot 5 outside image bounds: (187, 516)
+2025-07-23 13:15:07,189 - INFO - Result image saved: Video\target_1_result_20250723_131507.jpg
+2025-07-23 13:15:07,189 - INFO - Video analysis completed successfully: Analysis complete. Found 5 shots
+2025-07-23 13:15:07,189 - INFO - Video analysis completed successfully. Detected 5 shots
+2025-07-23 13:15:15,129 - INFO - Application terminated

@@ -1,0 +1,28 @@
+{
+  "parameters": {
+    "min_area": 13.71304347826087,
+    "max_area": 145.97826086956522,
+    "min_circularity": 0.5,
+    "shots_per_series": 5,
+    "number_of_targets": 1
+  },
+  "fixed_target_positions": [
+    [
+      359.0,
+      257.0
+    ],
+    [
+      259.0,
+      257.0
+    ],
+    [
+      357.0,
+      153.0
+    ],
+    [
+      261.0,
+      153.1
+    ]
+  ],
+  "timestamp": "2025-07-23T13:12:17.824421"
+}
