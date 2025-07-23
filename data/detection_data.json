@@ -1,83 +1,53 @@
 {
-  "analysis_timestamp": "2025-07-23T17:11:16.438876",
-  "total_shots": 5,
+  "analysis_timestamp": "2025-07-23T17:44:50.322952",
+  "total_shots": 3,
   "targets": [
     {
       "target_number": 1,
       "shots": [
         {
-          "timestamp": "2025-07-23T17:11:16.296715",
+          "timestamp": "2025-07-23T17:44:49.794509",
           "shot_number": 1,
           "absolute_position": {
-            "x": 260,
-            "y": 153.5
+            "x": 295.2169312169312,
+            "y": 338.8915343915344
           },
-          "detection_strategy": "hsv_direct",
-          "frame_number": 11,
-          "laser_info": {
-            "duration_frames": 4,
-            "first_seen": 11,
-            "last_seen": 14
-          }
-        },
-        {
-          "timestamp": "2025-07-23T17:11:16.296744",
-          "shot_number": 2,
-          "absolute_position": {
-            "x": 358.85,
-            "y": 153.5
-          },
-          "detection_strategy": "hsv_direct",
-          "frame_number": 25,
-          "laser_info": {
-            "duration_frames": 2,
-            "first_seen": 25,
-            "last_seen": 26
-          }
-        },
-        {
-          "timestamp": "2025-07-23T17:11:16.296753",
-          "shot_number": 3,
-          "absolute_position": {
-            "x": 358.85,
-            "y": 256.5
-          },
-          "detection_strategy": "hsv_direct",
-          "frame_number": 38,
-          "laser_info": {
-            "duration_frames": 4,
-            "first_seen": 38,
-            "last_seen": 41
-          }
-        },
-        {
-          "timestamp": "2025-07-23T17:11:16.296763",
-          "shot_number": 4,
-          "absolute_position": {
-            "x": 260,
-            "y": 256.5
-          },
-          "detection_strategy": "hsv_direct",
-          "frame_number": 51,
-          "laser_info": {
-            "duration_frames": 4,
-            "first_seen": 51,
-            "last_seen": 54
-          }
-        },
-        {
-          "timestamp": "2025-07-23T17:11:16.296768",
-          "shot_number": 5,
-          "absolute_position": {
-            "x": 309,
-            "y": 205
-          },
-          "detection_strategy": "hsv_direct",
-          "frame_number": 68,
+          "detection_strategy": "rgb_subtraction",
+          "frame_number": 3,
           "laser_info": {
             "duration_frames": 3,
-            "first_seen": 68,
-            "last_seen": 70
+            "first_seen": 3,
+            "last_seen": 5
+          }
+        },
+        {
+          "timestamp": "2025-07-23T17:44:49.794528",
+          "shot_number": 2,
+          "absolute_position": {
+            "x": 250.04700854700855,
+            "y": 297.4401709401709
+          },
+          "detection_strategy": "rgb_subtraction",
+          "frame_number": 7,
+          "laser_info": {
+            "duration_frames": 2,
+            "first_seen": 7,
+            "last_seen": 8
+          }
+        },
+        {
+          "timestamp": "2025-07-23T17:44:49.794543",
+          "shot_number": 3,
+          "absolute_position": {
+            "x": 259.75,
+            "y": 280.75
+          },
+          "detection_strategy": "rgb_subtraction",
+          "frame_number": 11,
+          "laser_info": {
+            "duration_frames": 2,
+            "first_seen": 11,
+            "last_seen": 12
           }
         }
       ]

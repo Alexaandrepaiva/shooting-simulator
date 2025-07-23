@@ -3,6 +3,7 @@ import logging
 import cv2
 from PIL import Image
 from .base import View
+from utils.spinner import ButtonStateManager
 
 
 class CalibrationView(View):
@@ -13,6 +14,7 @@ class CalibrationView(View):
         self.video_label = None
         self.value_labels = {}
         self.dropdown_controls = {}
+        self.button_state_manager = ButtonStateManager()
         self.create_widgets()
         
     def create_widgets(self):
@@ -251,6 +253,9 @@ class CalibrationView(View):
         )
         self.save_button.pack(pady=(0, 15), padx=15, fill="x")
         
+        # Add save button to state manager
+        self.button_state_manager.add_button("save", self.save_button)
+        
         # Initialize value displays
         self._initialize_value_displays()
         
@@ -367,8 +372,25 @@ class CalibrationView(View):
                     
     def on_save_parameters(self):
         """Handle save parameters button click"""
+        if self.button_state_manager.is_loading("save"):
+            return  # Prevent multiple clicks
+            
+        self.start_save_loading()
+        
         if self.controller:
             self.controller.save_parameters()
+    
+    def start_save_loading(self):
+        """Start loading state for Save button"""
+        self.button_state_manager.start_loading("save")
+        
+    def stop_save_loading(self):
+        """Stop loading state for Save button"""
+        self.button_state_manager.stop_loading("save")
+        
+    def stop_all_loading(self):
+        """Stop loading state for all buttons"""
+        self.button_state_manager.stop_all_loading()
     
     def show(self):
         """Show the calibration view"""
@@ -376,4 +398,9 @@ class CalibrationView(View):
         
     def hide(self):
         """Hide the calibration view"""
-        self.frame.pack_forget() 
+        self.frame.pack_forget()
+        
+    def destroy(self):
+        """Clean up resources when view is destroyed"""
+        self.button_state_manager.cleanup()
+        super().destroy() 

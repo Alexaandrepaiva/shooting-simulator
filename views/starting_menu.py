@@ -3,6 +3,7 @@ import os
 import logging
 from PIL import Image
 from .base import View
+from utils.spinner import ButtonStateManager
 
 
 class StartingMenuView(View):
@@ -10,6 +11,7 @@ class StartingMenuView(View):
     
     def __init__(self, parent, controller=None):
         super().__init__(parent, controller)
+        self.button_state_manager = ButtonStateManager()
         self.create_widgets()
         
     def create_widgets(self):
@@ -57,49 +59,79 @@ class StartingMenuView(View):
             )
             self.bg_image_label.pack(expand=True)
         
-        # Create button container frame
-        button_frame = ctk.CTkFrame(self.frame, fg_color="transparent")
-        button_frame.place(relx=0.5, rely=0.7, anchor="center")
-        
-        # Green "Iniciar" button
+        # Green "Iniciar" button - placed directly on main frame, positioned to the right
         self.iniciar_button = ctk.CTkButton(
-            button_frame,
+            self.frame,
             text="Iniciar",
             font=ctk.CTkFont(size=20, weight="bold"),
             fg_color="green",
             hover_color="darkgreen",
             text_color="white",
-            width=200,
-            height=50,
+            width=250,
+            height=60,
             command=self.on_iniciar_click
         )
-        self.iniciar_button.pack(pady=10)
+        self.iniciar_button.place(relx=0.75, rely=0.6, anchor="center")
         
-        # Blue "Manual de instruções" button
+        # Blue "Manual de instruções" button - placed directly on main frame, positioned below Iniciar
         self.manual_button = ctk.CTkButton(
-            button_frame,
+            self.frame,
             text="Manual de instruções",
             font=ctk.CTkFont(size=20, weight="bold"),
             fg_color="blue",
             hover_color="darkblue",
             text_color="white",
-            width=200,
-            height=50,
+            width=250,
+            height=60,
             command=self.on_manual_click
         )
-        self.manual_button.pack(pady=10)
+        self.manual_button.place(relx=0.75, rely=0.75, anchor="center")
+        
+        # Add buttons to state manager
+        self.button_state_manager.add_button("iniciar", self.iniciar_button)
+        self.button_state_manager.add_button("manual", self.manual_button)
         
     def on_iniciar_click(self):
         """Handle Iniciar button click"""
+        if self.button_state_manager.is_loading("iniciar"):
+            return  # Prevent multiple clicks
+            
         logging.info("Iniciar button clicked")
+        self.start_iniciar_loading()
+        
         if self.controller:
             self.controller.handle_iniciar()
             
     def on_manual_click(self):
         """Handle Manual button click"""
+        if self.button_state_manager.is_loading("manual"):
+            return  # Prevent multiple clicks
+            
         logging.info("Manual de Instrucoes button clicked")
+        self.start_manual_loading()
+        
         if self.controller:
             self.controller.handle_manual()
+    
+    def start_iniciar_loading(self):
+        """Start loading state for Iniciar button"""
+        self.button_state_manager.start_loading("iniciar")
+        
+    def stop_iniciar_loading(self):
+        """Stop loading state for Iniciar button"""
+        self.button_state_manager.stop_loading("iniciar")
+        
+    def start_manual_loading(self):
+        """Start loading state for Manual button"""
+        self.button_state_manager.start_loading("manual")
+        
+    def stop_manual_loading(self):
+        """Stop loading state for Manual button"""
+        self.button_state_manager.stop_loading("manual")
+        
+    def stop_all_loading(self):
+        """Stop loading state for all buttons"""
+        self.button_state_manager.stop_all_loading()
     
     def show(self):
         """Show the starting menu view"""
@@ -107,4 +139,9 @@ class StartingMenuView(View):
         
     def hide(self):
         """Hide the starting menu view"""
-        self.frame.pack_forget() 
+        self.frame.pack_forget()
+        
+    def destroy(self):
+        """Clean up resources when view is destroyed"""
+        self.button_state_manager.cleanup()
+        super().destroy() 
