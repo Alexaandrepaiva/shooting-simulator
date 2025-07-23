@@ -7,6 +7,7 @@ from PIL import Image
 import customtkinter as ctk
 from typing import Optional
 from controllers.video_analysis_controller import VideoAnalysisController
+from controllers.results_controller import ResultsController
 
 
 class SimulationController:
@@ -39,6 +40,9 @@ class SimulationController:
         
         # Video analysis controller
         self.video_analysis_controller = VideoAnalysisController()
+        
+        # Results controller for data processing and result generation
+        self.results_controller = ResultsController()
         
     def set_view(self, view):
         """Set the view that this controller manages"""
@@ -312,8 +316,43 @@ class SimulationController:
         """Callback for video analysis completion"""
         if success:
             logging.info(f"Video analysis completed successfully: {message}")
+            # Automatically continue with data processing and result generation
+            self._continue_pipeline_after_analysis()
         else:
             logging.error(f"Video analysis failed: {message}")
+            
+    def _continue_pipeline_after_analysis(self):
+        """Continue the pipeline after video analysis completes"""
+        try:
+            logging.info("Starting automatic data processing...")
+            
+            # Step 3: Process detection data to generate relative positions
+            processing_success = self.results_controller.process_detection_data()
+            if not processing_success:
+                logging.error("Data processing failed. Pipeline stopped.")
+                return
+                
+            logging.info("Data processing completed successfully. Starting result image generation...")
+            
+            # Step 4: Generate result images with shots and blob positions
+            result_generation_success = self.results_controller.generate_result_images()
+            if result_generation_success:
+                logging.info("Complete pipeline finished successfully!")
+                logging.info("Results available in:")
+                logging.info("  - Detection data: data/detection_data.json")
+                logging.info("  - Results data: data/results_data.json")
+                
+                # List generated result images
+                status = self.results_controller.get_processing_status()
+                if status.get("result_images"):
+                    logging.info("  - Result images:")
+                    for image_file in status["result_images"]:
+                        logging.info(f"    * data/{image_file}")
+            else:
+                logging.error("Result image generation failed.")
+                
+        except Exception as e:
+            logging.error(f"Error in pipeline continuation: {e}")
             
     def is_analysis_running(self) -> bool:
         """Check if video analysis is currently running"""
