@@ -266,16 +266,20 @@ class ResultsModel:
             # Draw shots on the image using relative positions
             self._draw_shots_with_smart_labels(result_image, shots, img_width, img_height)
             
-            # Add target information
-            info_text = f"Alvo {target_number} - {len(shots)} tiros"
+            # Add target information - simplified title
+            info_text = f"Alvo {target_number}"
             cv2.putText(result_image, info_text, (10, 30), 
                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
             cv2.putText(result_image, info_text, (10, 30), 
                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
             
-            # Save result image
-            output_filename = f"target_{target_number}_result.jpg"
-            output_path = os.path.join("data", output_filename)
+            # Create output directory if it doesn't exist
+            os.makedirs("output", exist_ok=True)
+            
+            # Save result image with new filename format
+            timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+            output_filename = f"target-{target_number}-{timestamp}.jpg"
+            output_path = os.path.join("output", output_filename)
             
             success = cv2.imwrite(output_path, result_image)
             if success:
@@ -316,11 +320,11 @@ class ResultsModel:
                 # Ensure shot is within image bounds
                 if 0 <= shot_x < img_width and 0 <= shot_y < img_height:
                     # Draw shot circle
-                    cv2.circle(result_image, (shot_x, shot_y), 8, (0, 0, 255), -1)  # Red filled circle
-                    cv2.circle(result_image, (shot_x, shot_y), 10, (255, 255, 255), 2)  # White border
+                    cv2.circle(result_image, (shot_x, shot_y), 5, (0, 0, 255), -1)  # Red filled circle (reduced size)
+                    cv2.circle(result_image, (shot_x, shot_y), 7, (255, 255, 255), 2)  # White border (reduced size)
                     
-                    # Add the shot position to used areas (20x20 pixels)
-                    shot_area = (shot_x - 10, shot_y - 10, 20, 20)
+                    # Add the shot position to used areas (16x16 pixels)
+                    shot_area = (shot_x - 8, shot_y - 8, 16, 16)
                     used_areas.append(shot_area)
                     
                     valid_shots.append((shot, shot_x, shot_y))
@@ -350,21 +354,29 @@ class ResultsModel:
         try:
             label_text = str(shot['shot_number'])
             font = cv2.FONT_HERSHEY_SIMPLEX
-            font_scale = 0.6
-            font_thickness = 2
-            text_size, _ = cv2.getTextSize(label_text, font, font_scale, font_thickness)
+            font_scale = 0.4 
+            outline_thickness = 2
+            text_thickness = 1
+            text_size, _ = cv2.getTextSize(label_text, font, font_scale, text_thickness)
             
-            # Add padding around text
-            text_width = text_size[0] + 8
-            text_height = text_size[1] + 8
+            # Add padding around text for collision detection
+            text_width = text_size[0] + 6
+            text_height = text_size[1] + 6
             
-            # Try different positions: right, top-right, bottom-right, top-left, bottom-left
+            # Try different positions
             label_offsets = [
-                (15, -text_height//2),              # right
-                (15, -(text_height + 5)),           # top-right
-                (15, 15),                           # bottom-right
-                (-(text_width + 5), -text_height//2), # left
-                (-(text_width + 5), -(text_height + 5)) # top-left
+                (12, -text_height//2),              # right
+                (12, -(text_height + 3)),           # top-right
+                (12, 12),                           # bottom-right
+                (-(text_width + 3), -text_height//2), # left
+                (-(text_width + 3), -(text_height + 3)), # top-left
+                (-(text_width + 3), 12),            # bottom-left
+                (-text_width//2, -(text_height + 8)), # top-center
+                (-text_width//2, 15),               # bottom-center
+                (15, -5),                           # top-right diagonal
+                (15, 8),                            # bottom-right diagonal
+                (-15, -5),                          # top-left diagonal
+                (-15, 8)                            # bottom-left diagonal
             ]
             
             label_placed = False
@@ -380,20 +392,17 @@ class ResultsModel:
                     # Check for overlaps
                     label_area = (label_x, label_y, text_width, text_height)
                     if not self._rectangles_overlap_any(label_area, used_areas):
-                        # Place label
-                        text_y = label_y + text_size[1]
+                        # Place label with red font and white outline (no background)
+                        text_y = label_y + text_size[1] + 3
+                        text_x = label_x + 3
                         
-                        # Draw background
-                        cv2.rectangle(result_image, (label_x, label_y), 
-                                    (label_x + text_width, label_y + text_height), 
-                                    (255, 255, 255), -1)
-                        cv2.rectangle(result_image, (label_x, label_y), 
-                                    (label_x + text_width, label_y + text_height), 
-                                    (0, 0, 0), 1)
+                        # Draw white outline
+                        cv2.putText(result_image, label_text, (text_x, text_y), 
+                                  font, font_scale, (255, 255, 255), outline_thickness)
                         
-                        # Draw text
-                        cv2.putText(result_image, label_text, (label_x + 4, text_y), 
-                                  font, font_scale, (0, 0, 0), font_thickness)
+                        # Draw red text
+                        cv2.putText(result_image, label_text, (text_x, text_y), 
+                                  font, font_scale, (0, 0, 255), text_thickness)
                         
                         # Add to used areas
                         used_areas.append(label_area)
@@ -401,7 +410,20 @@ class ResultsModel:
                         break
             
             if not label_placed:
-                logging.warning(f"Could not place label for shot {shot['shot_number']}")
+                logging.warning(f"Could not place label for shot {shot['shot_number']} - trying fallback position")
+                # Fallback: place label directly on the shot with smaller offset
+                text_y = shot_y + text_size[1]//2
+                text_x = shot_x - text_size[0]//2
+                
+                # Ensure fallback position is within bounds
+                if text_x >= 0 and text_y >= 0 and text_x + text_size[0] < result_image.shape[1] and text_y < result_image.shape[0]:
+                    # Draw white outline
+                    cv2.putText(result_image, label_text, (text_x, text_y), 
+                              font, font_scale, (255, 255, 255), outline_thickness)
+                    
+                    # Draw red text
+                    cv2.putText(result_image, label_text, (text_x, text_y), 
+                              font, font_scale, (0, 0, 255), text_thickness)
                 
         except Exception as e:
             logging.error(f"Error adding shot label: {e}")

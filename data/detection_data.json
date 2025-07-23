@@ -1,16 +1,16 @@
 {
-  "analysis_timestamp": "2025-07-23T16:43:43.456664",
+  "analysis_timestamp": "2025-07-23T17:11:16.438876",
   "total_shots": 5,
   "targets": [
     {
       "target_number": 1,
       "shots": [
         {
-          "timestamp": "2025-07-23T16:43:43.319147",
+          "timestamp": "2025-07-23T17:11:16.296715",
           "shot_number": 1,
           "absolute_position": {
-            "x": 309.04112662013955,
-            "y": 175.98709368348852
+            "x": 260,
+            "y": 153.5
           },
           "detection_strategy": "hsv_direct",
           "frame_number": 11,
@@ -21,11 +21,11 @@
           }
         },
         {
-          "timestamp": "2025-07-23T16:43:43.319243",
+          "timestamp": "2025-07-23T17:11:16.296744",
           "shot_number": 2,
           "absolute_position": {
-            "x": 313.20238095238096,
-            "y": 183.43650793650792
+            "x": 358.85,
+            "y": 153.5
           },
           "detection_strategy": "hsv_direct",
           "frame_number": 25,
@@ -36,11 +36,11 @@
           }
         },
         {
-          "timestamp": "2025-07-23T16:43:43.319258",
+          "timestamp": "2025-07-23T17:11:16.296753",
           "shot_number": 3,
           "absolute_position": {
-            "x": 318.3276417463537,
-            "y": 174.9203346855984
+            "x": 358.85,
+            "y": 256.5
           },
           "detection_strategy": "hsv_direct",
           "frame_number": 38,
@@ -51,11 +51,11 @@
           }
         },
         {
-          "timestamp": "2025-07-23T16:43:43.319265",
+          "timestamp": "2025-07-23T17:11:16.296763",
           "shot_number": 4,
           "absolute_position": {
-            "x": 323.0542929292929,
-            "y": 168.625
+            "x": 260,
+            "y": 256.5
           },
           "detection_strategy": "hsv_direct",
           "frame_number": 51,
@@ -66,11 +66,11 @@
           }
         },
         {
-          "timestamp": "2025-07-23T16:43:43.319309",
+          "timestamp": "2025-07-23T17:11:16.296768",
           "shot_number": 5,
           "absolute_position": {
-            "x": 322.8333333333333,
-            "y": 185.31275720164606
+            "x": 309,
+            "y": 205
           },
           "detection_strategy": "hsv_direct",
           "frame_number": 68,
