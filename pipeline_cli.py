@@ -15,6 +15,7 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from controllers.video_analysis_controller import VideoAnalysisController
+from controllers.results_controller import ResultsController
 
 
 class PipelineCLI:
@@ -212,6 +213,90 @@ class PipelineCLI:
             logging.error(f"Error generating homographies: {e}")
             return False
             
+    def process_data(self):
+        """
+        Process detection data and calibration data to generate relative positions
+        
+        This step:
+        - Loads calibration data (blob positions) from data/calibration_data.json
+        - Loads detection data (absolute shot positions) from data/detection_data.json
+        - Calculates relative positions of shots relative to target blob positions
+        - Saves results to data/results_data.json
+        """
+        logging.info("Processing detection data to generate relative positions...")
+        
+        try:
+            # Initialize results controller
+            results_controller = ResultsController()
+            
+            # Check status
+            status = results_controller.get_processing_status()
+            if not status["calibration_data_exists"]:
+                logging.error("Calibration data not found. Please run calibration first.")
+                return False
+                
+            if not status["detection_data_exists"]:
+                logging.error("Detection data not found. Please run analize-video first.")
+                return False
+                
+            # Process the data
+            success = results_controller.process_detection_data()
+            if success:
+                logging.info("Data processing completed successfully!")
+                logging.info("Results saved to: data/results_data.json")
+                return True
+            else:
+                logging.error("Data processing failed.")
+                return False
+                
+        except Exception as e:
+            logging.error(f"Error during data processing: {e}")
+            return False
+            
+    def generate_result(self):
+        """
+        Generate result images with labeled shots using alvobase image and results data
+        
+        This step:
+        - Loads results data from data/results_data.json
+        - Uses alvobase image as base
+        - Plots each shot using relative positions
+        - Adds smart label positioning for shot numbers
+        - Saves result images to data/ directory as target_X_result.jpg
+        """
+        logging.info("Generating result images with labeled shots...")
+        
+        try:
+            # Initialize results controller
+            results_controller = ResultsController()
+            
+            # Check status
+            status = results_controller.get_processing_status()
+            if not status["results_data_exists"]:
+                logging.error("Results data not found. Please run process-data first.")
+                return False
+                
+            # Generate result images
+            success = results_controller.generate_result_images()
+            if success:
+                logging.info("Result image generation completed successfully!")
+                
+                # List generated images
+                updated_status = results_controller.get_processing_status()
+                if updated_status["result_images"]:
+                    logging.info("Generated images:")
+                    for image_file in updated_status["result_images"]:
+                        logging.info(f"  - data/{image_file}")
+                        
+                return True
+            else:
+                logging.error("Result image generation failed.")
+                return False
+                
+        except Exception as e:
+            logging.error(f"Error during result image generation: {e}")
+            return False
+            
     def _analysis_progress(self, progress: float):
         """Progress callback for video analysis"""
         if int(progress) % 10 == 0:  # Log every 10%
@@ -222,7 +307,6 @@ class PipelineCLI:
         if success:
             logging.info(f"Analysis completed: {message}")
             logging.info(f"Detection data saved to: data/detection_data.json")
-            logging.info(f"Result images saved to: Video/ directory")
         else:
             logging.error(f"Analysis failed: {message}")
 
@@ -239,6 +323,12 @@ def main():
     # Analyze video command
     analyze_parser = subparsers.add_parser('analize-video', help='Analize video file to detect laser shots')
     analyze_parser.add_argument('video_path', help='Path to the video file to analize')
+    
+    # Process data command
+    subparsers.add_parser('process-data', help='Process detection and calibration data to generate relative positions')
+    
+    # Generate result command
+    subparsers.add_parser('generate-result', help='Generate result images with labeled shots using alvobase image')
     
     # Generate homographies command
     subparsers.add_parser('generate-homographies', help='Generate homographies from calibration data')
@@ -258,6 +348,10 @@ def main():
         cli.record_video()
     elif args.command == 'analize-video':
         cli.analyze_video(args.video_path)
+    elif args.command == 'process-data':
+        cli.process_data()
+    elif args.command == 'generate-result':
+        cli.generate_result()
     elif args.command == 'generate-homographies':
         cli.generate_homographies()
     else:

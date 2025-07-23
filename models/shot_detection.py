@@ -8,8 +8,18 @@ import logging
 from models.homography import HomographyModel
 
 
+class LaserState:
+    """State tracking for individual laser spots"""
+    def __init__(self, position: Tuple[float, float], frame_number: int):
+        self.position = position
+        self.first_seen_frame = frame_number
+        self.last_seen_frame = frame_number
+        self.total_frames_visible = 1
+        self.positions_history = [position]
+
+
 class ShotDetectionModel:
-    """Model for detecting laser shots using multiple detection strategies"""
+    """Model for detecting laser shots using multiple detection strategies with state machine"""
     
     def __init__(self):
         self.debugging = True  # Enable debugging output
@@ -80,7 +90,7 @@ class ShotDetectionModel:
     def _detect_shots_for_target(self, video_path: str, target_number: int, 
                                blob_positions: List[List[float]], shots_per_series: int,
                                progress_callback=None) -> List[Dict]:
-        """Detect shots for a specific target using multiple strategies in fallback order"""
+        """Detect shots for a specific target using multiple strategies and pick the best result"""
         
         # Open video
         cap = cv2.VideoCapture(video_path)
@@ -88,61 +98,230 @@ class ShotDetectionModel:
             raise RuntimeError(f"Could not open video file: {video_path}")
             
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        detected_shots = []
         
-        # Try each strategy until we find enough shots
+        # Try ALL strategies and collect results
+        strategy_results = []
+        
         for strategy_idx, strategy_name in enumerate(self.strategies):
             logging.info(f"Analysing target {target_number} strategy {strategy_idx + 1}/{len(self.strategies)}: {strategy_name}")
             
-            # Special handling for frame_difference strategy
-            if strategy_name == "frame_difference":
-                cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-                detected_shots = self._detect_shots_frame_difference(
-                    cap, target_number, blob_positions, shots_per_series, progress_callback, total_frames
-                )
-            else:
-                # Standard frame-by-frame detection for other strategies
-                cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-                detected_shots = self._detect_shots_standard(
-                    cap, target_number, blob_positions, strategy_name, shots_per_series, progress_callback, total_frames
-                )
+            # Reset video position for each strategy
+            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             
-            logging.info(f"Analysing target {target_number} strategy {strategy_idx + 1}/{len(self.strategies)}: {len(detected_shots)} shots found")
+            # Try this strategy
+            detected_shots = self._detect_shots_with_state_machine(
+                cap, target_number, blob_positions, strategy_name, shots_per_series, progress_callback, total_frames
+            )
             
-            # If we found enough shots, stop trying other strategies
-            if len(detected_shots) >= shots_per_series:
-                break
-                
+            # Store results for this strategy
+            strategy_results.append({
+                'strategy_name': strategy_name,
+                'shots_found': len(detected_shots),
+                'shots_data': detected_shots
+            })
+            
+            logging.info(f"Strategy {strategy_name}: found {len(detected_shots)} shots")
+        
         cap.release()
+        
+        # Find the strategy that found the most shots
+        if not strategy_results:
+            logging.warning(f"No strategies returned any results for target {target_number}")
+            return []
+        
+        # Log results from all strategies
+        logging.info(f"Target {target_number} - Strategy comparison:")
+        for result in strategy_results:
+            logging.info(f"  {result['strategy_name']}: {result['shots_found']} shots")
+        
+        best_strategy = max(strategy_results, key=lambda x: x['shots_found'])
+        
+        logging.info(f"Target {target_number}: Selected '{best_strategy['strategy_name']}' as best strategy with {best_strategy['shots_found']} shots")
+        
+        if best_strategy['shots_found'] < shots_per_series:
+            logging.warning(f"Target {target_number}: Best strategy found only {best_strategy['shots_found']}/{shots_per_series} expected shots")
+        else:
+            logging.info(f"Target {target_number}: Best strategy found {best_strategy['shots_found']} shots (expected {shots_per_series})")
+        
+        # Return the best strategy results, but limit to shots_per_series for final output
+        best_shots = best_strategy['shots_data'][:shots_per_series]
+        
+        # Update shot numbers to be sequential (in case we're limiting the results)
+        for i, shot in enumerate(best_shots):
+            shot['shot_number'] = i + 1
+            
+        return best_shots
+        
+    def _detect_shots_with_state_machine(self, cap, target_number: int, blob_positions: List[List[float]], 
+                                       strategy_name: str, shots_per_series: int, progress_callback, total_frames: int) -> List[Dict]:
+        """
+        Pure state machine for shot detection:
+        - State: 'no_laser' or 'laser_present'
+        - Transition no_laser -> laser_present: Start new laser
+        - Transition laser_present -> no_laser: Complete shot
+        - Stay in laser_present: Continue same laser (update position)
+        """
+        
+        detected_shots = []
+        frame_count = 0
+        previous_frame = None
+        
+        # Pure state machine
+        current_state = "no_laser"  # Current state: "no_laser" or "laser_present"
+        current_laser = None  # Current laser being tracked (LaserState object)
+        completed_shots = []  # List of completed shots
+        
+        try:
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    break
+                    
+                laser_detected = False
+                laser_position = None
+                
+                # Detect if laser is present in current frame
+                if previous_frame is not None:
+                    laser_positions = self._detect_all_laser_positions(
+                        frame, previous_frame, blob_positions, strategy_name
+                    )
+                    
+                    if laser_positions:
+                        laser_detected = True
+                        # Use first detected laser position (simplest approach)
+                        laser_position = laser_positions[0]
+                
+                # State machine transitions
+                if current_state == "no_laser":
+                    if laser_detected:
+                        # Transition: no_laser -> laser_present
+                        current_state = "laser_present"
+                        current_laser = LaserState(laser_position, frame_count)
+                        logging.debug(f"Laser started at frame {frame_count}: {laser_position}")
+                        
+                elif current_state == "laser_present":
+                    if laser_detected:
+                        # Stay in laser_present state - update current laser
+                        current_laser.position = laser_position
+                        current_laser.last_seen_frame = frame_count
+                        current_laser.total_frames_visible += 1
+                        current_laser.positions_history.append(laser_position)
+                    else:
+                        # Transition: laser_present -> no_laser
+                        current_state = "no_laser"
+                        completed_shots.append(current_laser)
+                        logging.info(f"Shot completed: laser from frame {current_laser.first_seen_frame} to {current_laser.last_seen_frame}")
+                        current_laser = None
+                
+                previous_frame = frame.copy()
+                frame_count += 1
+                
+                # Progress callback
+                if progress_callback and frame_count % 30 == 0:
+                    progress = (frame_count / total_frames) * 100
+                    progress_callback(progress)
+                    
+        except Exception as e:
+            logging.error(f"Error in strategy {strategy_name}: {e}")
+        
+        # Handle case where video ends while laser is still present
+        if current_state == "laser_present" and current_laser is not None:
+            completed_shots.append(current_laser)
+            logging.info(f"Final shot completed: laser from frame {current_laser.first_seen_frame} to {current_laser.last_seen_frame}")
+        
+        # Convert completed laser states to shot data (return ALL detected shots, not limited to shots_per_series)
+        for i, laser_state in enumerate(completed_shots):
+            # Use the average position of the laser during its lifetime
+            avg_position = self._calculate_average_position(laser_state.positions_history)
+            
+            shot_data = {
+                "timestamp": datetime.now().isoformat(),
+                "target_number": target_number,
+                "shot_number": i + 1,
+                "absolute_position": {
+                    "x": avg_position[0],
+                    "y": avg_position[1]
+                },
+                "detection_strategy": strategy_name,
+                "frame_number": laser_state.first_seen_frame,
+                "laser_info": {
+                    "duration_frames": laser_state.total_frames_visible,
+                    "first_seen": laser_state.first_seen_frame,
+                    "last_seen": laser_state.last_seen_frame
+                }
+            }
+            
+            detected_shots.append(shot_data)
+            
+        logging.info(f"Pure state machine detected {len(completed_shots)} laser events, returning {len(detected_shots)} shots")
         return detected_shots
         
-    def _detect_shot_in_camera_frame(self, frame: np.ndarray, previous_frame: np.ndarray,
-                                   blob_positions: List[List[float]], strategy: str) -> Optional[Tuple[float, float]]:
+    def _detect_all_laser_positions(self, frame: np.ndarray, previous_frame: np.ndarray, 
+                                  blob_positions: List[List[float]], strategy: str) -> List[Tuple[float, float]]:
         """
-        Detect shot in the original camera frame, focused on the target region
+        Detect ALL laser positions in the current frame (not just the first one)
         
         Args:
-            frame: Current frame in camera coordinates
-            previous_frame: Previous frame in camera coordinates  
-            blob_positions: 4 blob positions defining the target region
+            frame: Current frame
+            previous_frame: Previous frame  
+            blob_positions: Target blob positions
             strategy: Detection strategy to use
             
         Returns:
-            Tuple[float, float]: Shot position in camera coordinates, or None if no shot detected
+            List of all detected laser positions in this frame
         """
         try:
-            # Create a mask for the target region defined by blob positions
+            # Create target region mask
             mask = self._create_target_region_mask(frame, blob_positions)
             
-            # Apply detection strategy in camera frame
-            shot_position = self._detect_shot_with_strategy(frame, mask, previous_frame, strategy)
+            # Get detection mask using the specific strategy
+            if strategy == "rgb_enhanced":
+                detection_mask = self._get_rgb_enhanced_mask(frame, mask, previous_frame)
+            elif strategy == "rgb_subtraction":
+                detection_mask = self._get_rgb_subtraction_mask(frame, mask, previous_frame)
+            elif strategy == "hsv_subtraction":
+                detection_mask = self._get_hsv_subtraction_mask(frame, mask, previous_frame)
+            elif strategy == "hsv_direct":
+                detection_mask = self._get_hsv_direct_mask(frame, mask, previous_frame)
+            elif strategy == "frame_difference":
+                detection_mask = self._get_frame_difference_mask(frame, mask, previous_frame)
+            else:
+                return []
+                
+            if detection_mask is None:
+                return []
+                
+            # Find all contours (potential laser spots)
+            contours, _ = cv2.findContours(detection_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
-            return shot_position
+            laser_positions = []
+            for contour in contours:
+                area = cv2.contourArea(contour)
+                if 1 <= area <= 500:  # Valid area range for laser spots
+                    M = cv2.moments(contour)
+                    if M["m00"] > 0:
+                        cx = M["m10"] / M["m00"]
+                        cy = M["m01"] / M["m00"]
+                        
+                        # Validate this is actually a laser spot
+                        if self._validate_laser_spot(frame, (cx, cy), strategy):
+                            laser_positions.append((cx, cy))
+            
+            return laser_positions
             
         except Exception as e:
-            logging.error(f"Error detecting shot in camera frame: {e}")
-            return None
+            logging.error(f"Error detecting laser positions: {e}")
+            return []
             
+    def _calculate_average_position(self, positions_history: List[Tuple[float, float]]) -> Tuple[float, float]:
+        """Calculate the average position from a list of positions"""
+        if not positions_history:
+            return (0.0, 0.0)
+            
+        avg_x = sum(pos[0] for pos in positions_history) / len(positions_history)
+        avg_y = sum(pos[1] for pos in positions_history) / len(positions_history)
+        return (avg_x, avg_y)
+        
     def _create_target_region_mask(self, frame: np.ndarray, blob_positions: List[List[float]]) -> np.ndarray:
         """
         Create a mask for the target region defined by blob positions
@@ -170,62 +349,10 @@ class ShotDetectionModel:
             logging.error(f"Error creating target region mask: {e}")
             # Return full frame mask as fallback
             return np.ones(frame.shape[:2], dtype=np.uint8) * 255
-        
-    def _warp_to_square(self, frame: np.ndarray, points: List[List[float]], 
-                       size: int) -> Tuple[np.ndarray, np.ndarray, int, Tuple[int, int], np.ndarray]:
-        """Apply warping transformation to frame using blob coordinates"""
-        try:
-            # Convert points to proper format
-            points_array = np.array(points, dtype="float32")
             
-            # Define square points for warping (corners of the target area)
-            square_points = np.float32([[0, 0], [size, 0], [size, size], [0, size]])
-            
-            # Calculate homography matrix
-            matrix = cv2.getPerspectiveTransform(points_array, square_points)
-            
-            # Apply warping
-            warped_frame = cv2.warpPerspective(frame, matrix, (size, size))
-            
-            # Create mask for the target area
-            increased_radius = size // 2 - 18
-            mask_center = (size // 2, size // 2)
-            mask = np.zeros((size, size), dtype="uint8")
-            cv2.circle(mask, mask_center, increased_radius, 255, -1)
-            
-            return warped_frame, mask, increased_radius, mask_center, matrix
-            
-        except Exception as e:
-            logging.error(f"Error in warping: {e}")
-            # Return original frame with basic mask if warping fails
-            mask = np.ones((frame.shape[0], frame.shape[1]), dtype="uint8") * 255
-            return frame, mask, frame.shape[0]//2, (frame.shape[1]//2, frame.shape[0]//2), np.eye(3)
-            
-    def _detect_shot_with_strategy(self, frame: np.ndarray, mask: np.ndarray, 
-                                 previous_frame: np.ndarray, strategy: str) -> Optional[Tuple[float, float]]:
-        """Detect shot using specific strategy"""
-        try:
-            if strategy == "rgb_enhanced":
-                return self._detect_red_spot_enhanced_rgb(frame, mask, previous_frame)
-            elif strategy == "rgb_subtraction":
-                return self._detect_red_spot_rgb_subtraction(frame, mask, previous_frame)
-            elif strategy == "hsv_subtraction":
-                return self._detect_red_spot_with_hsv_subtraction(frame, mask, previous_frame)
-            elif strategy == "hsv_direct":
-                return self._detect_red_spot_hsv_direct(frame, mask, previous_frame)
-            elif strategy == "frame_difference":
-                return self._detect_shot_frame_difference_single(frame, mask, previous_frame)
-            else:
-                logging.warning(f"Unknown strategy: {strategy}")
-                return None
-                
-        except Exception as e:
-            logging.error(f"Error in strategy {strategy}: {e}")
-            return None
-            
-    def _detect_red_spot_enhanced_rgb(self, frame: np.ndarray, mask: np.ndarray, 
-                                    previous_frame: Optional[np.ndarray]) -> Optional[Tuple[float, float]]:
-        """Enhanced RGB detection for 650nm red laser"""
+    def _get_rgb_enhanced_mask(self, frame: np.ndarray, mask: np.ndarray, 
+                             previous_frame: Optional[np.ndarray]) -> Optional[np.ndarray]:
+        """Enhanced RGB detection mask for 650nm red laser"""
         try:
             if previous_frame is None:
                 return None
@@ -254,14 +381,14 @@ class ShotDetectionModel:
             else:
                 final_mask = cv2.bitwise_and(red_thresh_conservative, mask)
                 
-            return self._validate_and_find_red_spot(frame, final_mask)
+            return final_mask
             
         except Exception as e:
             return None
             
-    def _detect_red_spot_rgb_subtraction(self, frame: np.ndarray, mask: np.ndarray, 
-                                       previous_frame: Optional[np.ndarray]) -> Optional[Tuple[float, float]]:
-        """RGB subtraction method"""
+    def _get_rgb_subtraction_mask(self, frame: np.ndarray, mask: np.ndarray, 
+                                previous_frame: Optional[np.ndarray]) -> Optional[np.ndarray]:
+        """RGB subtraction detection mask"""
         try:
             if previous_frame is None:
                 return None
@@ -282,7 +409,7 @@ class ShotDetectionModel:
             threshold_value = max(8, red_mean + 1.5 * red_std)
             _, red_thresh = cv2.threshold(red_diff, threshold_value, 255, cv2.THRESH_BINARY)
             
-            # Check red dominance
+            # Check red dominance in current frame
             red_channel = frame[:, :, 2]
             green_channel = frame[:, :, 1]
             blue_channel = frame[:, :, 0]
@@ -301,17 +428,14 @@ class ShotDetectionModel:
             final_mask = cv2.morphologyEx(final_mask, cv2.MORPH_OPEN, kernel)
             final_mask = cv2.morphologyEx(final_mask, cv2.MORPH_CLOSE, kernel)
             
-            if cv2.countNonZero(final_mask) < 1:
-                return None
-                
-            return self._find_laser_spot_by_contours_strict(final_mask, frame)
+            return final_mask if cv2.countNonZero(final_mask) >= 1 else None
             
         except Exception as e:
             return None
             
-    def _detect_red_spot_with_hsv_subtraction(self, frame: np.ndarray, mask: np.ndarray, 
-                                            previous_frame: Optional[np.ndarray]) -> Optional[Tuple[float, float]]:
-        """HSV detection with frame subtraction"""
+    def _get_hsv_subtraction_mask(self, frame: np.ndarray, mask: np.ndarray, 
+                                previous_frame: Optional[np.ndarray]) -> Optional[np.ndarray]:
+        """HSV detection with frame subtraction mask"""
         try:
             if previous_frame is None:
                 return None
@@ -327,19 +451,54 @@ class ShotDetectionModel:
             red_mask = self._detect_red_laser_spot_hsv(diff_image)
             final_mask = cv2.bitwise_and(red_mask, mask)
             
-            return self._find_laser_spot_by_contours(final_mask)
+            return final_mask if cv2.countNonZero(final_mask) >= 1 else None
             
         except Exception as e:
             return None
             
-    def _detect_red_spot_hsv_direct(self, frame: np.ndarray, mask: np.ndarray, 
-                                  previous_frame: Optional[np.ndarray]) -> Optional[Tuple[float, float]]:
-        """Direct HSV detection on current frame"""
+    def _get_hsv_direct_mask(self, frame: np.ndarray, mask: np.ndarray, 
+                           previous_frame: Optional[np.ndarray]) -> Optional[np.ndarray]:
+        """Direct HSV detection mask"""
         try:
             red_mask = self._detect_red_laser_spot_hsv_relaxed(frame)
             final_mask = cv2.bitwise_and(red_mask, mask)
             
-            return self._find_laser_spot_by_contours(final_mask)
+            return final_mask if cv2.countNonZero(final_mask) >= 1 else None
+            
+        except Exception as e:
+            return None
+            
+    def _get_frame_difference_mask(self, frame: np.ndarray, mask: np.ndarray, 
+                                 previous_frame: Optional[np.ndarray]) -> Optional[np.ndarray]:
+        """Frame difference detection mask"""
+        try:
+            if previous_frame is None:
+                return None
+            
+            # Calculate frame difference
+            frame_diff = cv2.absdiff(frame, previous_frame)
+            gray_diff = cv2.cvtColor(frame_diff, cv2.COLOR_BGR2GRAY)
+            
+            # Apply mask
+            masked_diff = cv2.bitwise_and(gray_diff, mask)
+            
+            # Check if there's significant change
+            mean_intensity = np.mean(masked_diff)
+            max_intensity = np.max(masked_diff)
+            
+            if mean_intensity < 8 or max_intensity < 20:
+                return None
+            
+            # Apply threshold
+            threshold = max(3, mean_intensity * 0.5)
+            _, binary_diff = cv2.threshold(masked_diff, threshold, 255, cv2.THRESH_BINARY)
+            
+            # Apply gentle morphological operations
+            kernel = np.ones((2, 2), np.uint8)
+            binary_diff = cv2.morphologyEx(binary_diff, cv2.MORPH_OPEN, kernel)
+            binary_diff = cv2.morphologyEx(binary_diff, cv2.MORPH_CLOSE, kernel)
+            
+            return binary_diff if cv2.countNonZero(binary_diff) >= 1 else None
             
         except Exception as e:
             return None
@@ -390,31 +549,28 @@ class ShotDetectionModel:
 
         return red_mask
         
-    def _validate_and_find_red_spot(self, frame: np.ndarray, candidate_mask: np.ndarray) -> Optional[Tuple[float, float]]:
-        """Validate and find the best red spot candidate"""
-        contours, _ = cv2.findContours(candidate_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    def _validate_laser_spot(self, frame: np.ndarray, position: Tuple[float, float], 
+                           strategy: str) -> bool:
+        """
+        Validate that a detected position is actually a laser spot
         
-        if not contours:
-            return None
+        Args:
+            frame: Current frame
+            position: Detected position (x, y)
+            strategy: Detection strategy used
             
-        best_spot = None
-        best_score = 0
-        
-        for contour in contours:
-            area = cv2.contourArea(contour)
-            if not (1 <= area <= 500):
-                continue
-                
-            M = cv2.moments(contour)
-            if M["m00"] == 0:
-                continue
-                
-            cx = M["m10"] / M["m00"]
-            cy = M["m01"] / M["m00"]
+        Returns:
+            bool: True if position is valid laser spot
+        """
+        try:
+            x, y = int(position[0]), int(position[1])
             
-            # Validate red dominance
-            x, y = int(cx), int(cy)
-            if (0 <= x < frame.shape[1] and 0 <= y < frame.shape[0]):
+            # Check bounds
+            if not (0 <= x < frame.shape[1] and 0 <= y < frame.shape[0]):
+                return False
+            
+            # For RGB-based strategies, validate red dominance
+            if strategy in ["rgb_enhanced", "rgb_subtraction"]:
                 roi_size = 3
                 x1, x2 = max(0, x-roi_size), min(frame.shape[1], x+roi_size+1)
                 y1, y2 = max(0, y-roi_size), min(frame.shape[0], y+roi_size+1)
@@ -423,107 +579,14 @@ class ShotDetectionModel:
                 if roi.size > 0:
                     b_mean, g_mean, r_mean = np.mean(roi, axis=(0,1))
                     red_dominance = r_mean / (g_mean + b_mean + 1e-6)
-                    intensity_score = r_mean / 255.0
-                    area_score = min(area / 50.0, 1.0)
-                    
-                    total_score = red_dominance * intensity_score * area_score
-                    
-                    if total_score > best_score and red_dominance > 0.8:
-                        best_score = total_score
-                        best_spot = (cx, cy)
-                        
-        return best_spot
-        
-    def _find_laser_spot_by_contours_strict(self, mask: np.ndarray, frame: np.ndarray) -> Optional[Tuple[float, float]]:
-        """Find laser spot with strict validation"""
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
-        if not contours:
-            return None
+                    return red_dominance > 0.7 and r_mean > 40
             
-        valid_contours = []
-        for contour in contours:
-            area = cv2.contourArea(contour)
-            if 1 <= area <= 300:
-                valid_contours.append((contour, area))
-                
-        if not valid_contours:
-            return None
+            # For other strategies, basic validation
+            return True
             
-        best_spot = None
-        best_score = 0
-        
-        for contour, area in valid_contours:
-            M = cv2.moments(contour)
-            if M["m00"] == 0:
-                continue
-                
-            center_x = M["m10"] / M["m00"]
-            center_y = M["m01"] / M["m00"]
+        except Exception as e:
+            return False
             
-            # Validate RGB
-            x, y = int(center_x), int(center_y)
-            if not (0 <= x < frame.shape[1] and 0 <= y < frame.shape[0]):
-                continue
-                
-            roi_size = 2
-            x1, x2 = max(0, x-roi_size), min(frame.shape[1], x+roi_size+1)
-            y1, y2 = max(0, y-roi_size), min(frame.shape[0], y+roi_size+1)
-            
-            roi = frame[y1:y2, x1:x2]
-            if roi.size == 0:
-                continue
-                
-            b_mean, g_mean, r_mean = np.mean(roi, axis=(0,1))
-            red_dominance_avg = r_mean / (g_mean + b_mean + 1e-6)
-            red_intensity = r_mean / 255.0
-            red_contrast = (r_mean - g_mean) + (r_mean - b_mean)
-            
-            if (red_dominance_avg > 0.7 and red_intensity > 0.1 and 
-                red_contrast > 5 and r_mean > 50):
-                
-                score = red_dominance_avg * red_intensity * (area / 50.0)
-                
-                if score > best_score:
-                    best_score = score
-                    best_spot = (center_x, center_y)
-                    
-        return best_spot
-        
-    def _find_laser_spot_by_contours(self, mask: np.ndarray) -> Optional[Tuple[float, float]]:
-        """Find laser spot using contours"""
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
-        if not contours:
-            return None
-            
-        valid_contours = []
-        for contour in contours:
-            area = cv2.contourArea(contour)
-            if 1 <= area <= 1000:
-                valid_contours.append((contour, area))
-                
-        if not valid_contours:
-            # Fallback to moments
-            M = cv2.moments(mask)
-            if M["m00"] > 0:
-                center_x = M["m10"] / M["m00"]
-                center_y = M["m01"] / M["m00"]
-                return (center_x, center_y)
-            return None
-            
-        # Choose largest contour
-        largest_contour = max(valid_contours, key=lambda x: x[1])[0]
-        
-        M = cv2.moments(largest_contour)
-        if M["m00"] == 0:
-            return None
-            
-        center_x = M["m10"] / M["m00"]
-        center_y = M["m01"] / M["m00"]
-        
-        return (center_x, center_y)
-        
     def _save_shots_to_json(self, shots: List[Dict]) -> str:
         """Save detected shots to detection_data.json file organized by target"""
         try:
@@ -546,14 +609,19 @@ class ShotDetectionModel:
                     }
                     
                 # Add shot to target data
-                targets_data[target_num]["shots"].append({
+                shot_data = {
                     "timestamp": shot["timestamp"],
                     "shot_number": shot["shot_number"],
-                    "camera_position": shot["camera_position"],
-                    "target_position": shot["target_position"],
+                    "absolute_position": shot["absolute_position"],
                     "detection_strategy": shot["detection_strategy"],
                     "frame_number": shot["frame_number"]
-                })
+                }
+                
+                # Add laser_info if present
+                if "laser_info" in shot:
+                    shot_data["laser_info"] = shot["laser_info"]
+                    
+                targets_data[target_num]["shots"].append(shot_data)
             
             # Convert to list format and sort by target number
             detection_data = {
@@ -570,334 +638,4 @@ class ShotDetectionModel:
             
         except Exception as e:
             logging.error(f"Error saving detection data to JSON: {e}")
-            return None
-
-    def _detect_shots_standard(self, cap, target_number: int, blob_positions: List[List[float]], 
-                              strategy_name: str, shots_per_series: int, progress_callback, total_frames: int) -> List[Dict]:
-        """Standard frame-by-frame detection for rgb_enhanced, rgb_subtraction, hsv_subtraction, hsv_direct"""
-        
-        detected_shots = []
-        frame_count = 0
-        previous_frame = None
-        
-        try:
-            while True:
-                ret, frame = cap.read()
-                if not ret:
-                    break
-                    
-                # Process frame for shot detection
-                if previous_frame is not None:
-                    # Detect shot in the original frame (camera coordinates)
-                    shot_position_camera = self._detect_shot_in_camera_frame(
-                        frame, previous_frame, blob_positions, strategy_name
-                    )
-                    
-                    if shot_position_camera is not None:
-                        # Transform camera coordinates to target coordinates using homography
-                        target_position = self.homography_model.transform_camera_to_target(
-                            shot_position_camera, target_number
-                        )
-                        
-                        # Create shot data
-                        shot_data = {
-                            "timestamp": datetime.now().isoformat(),
-                            "target_number": target_number,
-                            "shot_number": len(detected_shots) + 1,
-                            "camera_position": {
-                                "x": shot_position_camera[0],
-                                "y": shot_position_camera[1]
-                            },
-                            "target_position": {
-                                "x": target_position[0],
-                                "y": target_position[1]
-                            },
-                            "detection_strategy": strategy_name,
-                            "frame_number": frame_count
-                        }
-                        
-                        detected_shots.append(shot_data)
-                        
-                        # Check if we have enough shots
-                        if len(detected_shots) >= shots_per_series:
-                            break
-                
-                previous_frame = frame.copy()
-                frame_count += 1
-                
-                # Progress callback
-                if progress_callback and frame_count % 30 == 0:
-                    progress = (frame_count / total_frames) * 100
-                    progress_callback(progress)
-                    
-        except Exception as e:
-            logging.error(f"Error in strategy {strategy_name}: {e}")
-            
-        return detected_shots
-        
-    def _detect_shots_frame_difference(self, cap, target_number: int, blob_positions: List[List[float]], 
-                                     shots_per_series: int, progress_callback, total_frames: int) -> List[Dict]:
-        """
-        Detect shots using frame difference strategy with rising edge detection
-        This method processes the entire video to detect shots by tracking intensity changes
-        """
-        
-        detected_shots = []
-        frame_count = 0
-        previous_frame = None
-        
-        # Fine-tuned parameters for shot detection to get 5 shots
-        min_intensity_threshold = 6   # Lower threshold to catch more shots
-        shot_duration_threshold = 3   # Keep duration requirement
-        cooldown_frames = 8          # Reduce cooldown to allow more shots
-        
-        # State tracking
-        current_intensity_state = "low"  # "low" or "high"
-        high_intensity_start_frame = None
-        frames_since_last_shot = 0
-        
-        # Statistics for adaptive thresholding
-        intensity_history = []
-        max_intensity_seen = 0
-        
-        try:
-            while True:
-                ret, frame = cap.read()
-                if not ret:
-                    break
-                    
-                if previous_frame is not None:
-                    # Create target region mask
-                    mask = self._create_target_region_mask(frame, blob_positions)
-                    
-                    # Calculate frame difference within target region
-                    frame_diff = cv2.absdiff(frame, previous_frame)
-                    
-                    # Convert to grayscale and apply mask
-                    gray_diff = cv2.cvtColor(frame_diff, cv2.COLOR_BGR2GRAY)
-                    masked_diff = cv2.bitwise_and(gray_diff, mask)
-                    
-                    # Calculate intensity metrics
-                    mean_intensity = np.mean(masked_diff)
-                    max_intensity = np.max(masked_diff)
-                    max_intensity_seen = max(max_intensity_seen, max_intensity)
-                    
-                    # Keep track of intensity history for adaptive thresholding
-                    intensity_history.append(mean_intensity)
-                    if len(intensity_history) > 30:  # Keep last 30 frames
-                        intensity_history.pop(0)
-                    
-                    # Calculate adaptive threshold - more sensitive approach
-                    if len(intensity_history) >= 10:
-                        baseline_intensity = np.median(intensity_history)
-                        intensity_std = np.std(intensity_history)
-                        # Use a lower multiplier for higher sensitivity
-                        adaptive_threshold = max(min_intensity_threshold, baseline_intensity + 1.2 * intensity_std)
-                    else:
-                        adaptive_threshold = min_intensity_threshold
-                    
-                    # State machine for shot detection
-                    frames_since_last_shot += 1
-                    
-                    if current_intensity_state == "low":
-                        # Looking for rising edge (shot appearing) - balanced sensitivity
-                        # Require both significant mean and peak intensity
-                        if ((mean_intensity > adaptive_threshold and max_intensity > adaptive_threshold * 1.8) or 
-                            max_intensity > 35):  # Slightly lower absolute threshold
-                            current_intensity_state = "high"
-                            high_intensity_start_frame = frame_count
-                    
-                    elif current_intensity_state == "high":
-                        # In high intensity state, check for falling edge or shot confirmation
-                        frames_in_high_state = frame_count - high_intensity_start_frame
-                        
-                        # Check if intensity dropped (falling edge) - more flexible approach
-                        falling_edge_detected = False
-                        
-                        # Primary falling edge criteria
-                        if mean_intensity < adaptive_threshold * 0.8 and max_intensity < adaptive_threshold * 1.5:
-                            falling_edge_detected = True
-                        
-                        # Alternative falling edge: significant drop from recent high
-                        elif len(intensity_history) >= 5:
-                            recent_max = max(intensity_history[-5:])
-                            if max_intensity < recent_max * 0.6:
-                                falling_edge_detected = True
-                        
-                        # Force shot detection if we've been in high state for reasonable duration
-                        # This handles cases where the falling edge is gradual - balanced criteria
-                        force_shot_detection = (frames_in_high_state >= 8 and 
-                                              frames_in_high_state <= 18 and
-                                              frames_since_last_shot >= cooldown_frames and
-                                              max_intensity_seen > 25)  # Lower intensity requirement
-                        
-                        if falling_edge_detected or force_shot_detection:
-                            # Falling edge detected - this completes a shot if it lasted long enough
-                            if (frames_in_high_state >= shot_duration_threshold and 
-                                frames_since_last_shot >= cooldown_frames):
-                                
-                                # Find the shot position using the high intensity region
-                                # Use a lower threshold for better detection
-                                search_threshold = min(adaptive_threshold * 0.3, 3.0)
-                                shot_position = self._find_shot_position_in_difference(
-                                    frame, previous_frame, mask, search_threshold
-                                )
-                                
-                                if shot_position is not None:
-                                    # Transform to target coordinates
-                                    target_position = self.homography_model.transform_camera_to_target(
-                                        shot_position, target_number
-                                    )
-                                    
-                                    # Create shot data
-                                    shot_data = {
-                                        "timestamp": datetime.now().isoformat(),
-                                        "target_number": target_number,
-                                        "shot_number": len(detected_shots) + 1,
-                                        "camera_position": {
-                                            "x": shot_position[0],
-                                            "y": shot_position[1]
-                                        },
-                                        "target_position": {
-                                            "x": target_position[0],
-                                            "y": target_position[1]
-                                        },
-                                        "detection_strategy": "frame_difference",
-                                        "frame_number": frame_count,
-                                        "intensity_info": {
-                                            "mean_intensity": mean_intensity,
-                                            "max_intensity": max_intensity,
-                                            "threshold": adaptive_threshold,
-                                            "duration_frames": frames_in_high_state,
-                                            "detection_type": "force" if force_shot_detection else "edge"
-                                        }
-                                    }
-                                    
-                                    detected_shots.append(shot_data)
-                                    frames_since_last_shot = 0
-                                    
-                                    # Check if we have enough shots
-                                    if len(detected_shots) >= shots_per_series:
-                                        break
-                            
-                            current_intensity_state = "low"
-                        
-                        # If in high state too long without falling edge, reset (noise rejection)
-                        elif frames_in_high_state > 25:  # Allow slightly longer high states
-                            current_intensity_state = "low"
-                
-                previous_frame = frame.copy()
-                frame_count += 1
-                
-                # Progress callback
-                if progress_callback and frame_count % 30 == 0:
-                    progress = (frame_count / total_frames) * 100
-                    progress_callback(progress)
-                    
-        except Exception as e:
-            logging.error(f"Error in frame difference detection: {e}")
-            
-        return detected_shots
-    
-    def _find_shot_position_in_difference(self, frame: np.ndarray, previous_frame: np.ndarray, 
-                                        mask: np.ndarray, threshold: float) -> Optional[Tuple[float, float]]:
-        """
-        Find the position of the shot in the difference image
-        """
-        try:
-            # Calculate frame difference
-            frame_diff = cv2.absdiff(frame, previous_frame)
-            gray_diff = cv2.cvtColor(frame_diff, cv2.COLOR_BGR2GRAY)
-            
-            # Apply mask and threshold - use a lower threshold for better sensitivity
-            masked_diff = cv2.bitwise_and(gray_diff, mask)
-            adaptive_threshold = max(3, threshold)  # Ensure minimum threshold of 3
-            _, binary_diff = cv2.threshold(masked_diff, adaptive_threshold, 255, cv2.THRESH_BINARY)
-            
-            # Apply gentle morphological operations to clean up noise
-            kernel = np.ones((2, 2), np.uint8)  # Smaller kernel for better preservation
-            binary_diff = cv2.morphologyEx(binary_diff, cv2.MORPH_OPEN, kernel)
-            binary_diff = cv2.morphologyEx(binary_diff, cv2.MORPH_CLOSE, kernel)
-            
-            # Find contours
-            contours, _ = cv2.findContours(binary_diff, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            
-            if not contours:
-                # Fallback to center of mass with lower threshold
-                fallback_threshold = max(1, threshold * 0.3)
-                _, binary_fallback = cv2.threshold(masked_diff, fallback_threshold, 255, cv2.THRESH_BINARY)
-                moments = cv2.moments(binary_fallback)
-                if moments["m00"] > 0:
-                    cx = moments["m10"] / moments["m00"]
-                    cy = moments["m01"] / moments["m00"]
-                    return (cx, cy)
-                return None
-            
-            # Find the largest significant contour with more permissive area
-            valid_contours = []
-            for contour in contours:
-                area = cv2.contourArea(contour)
-                if area >= 1:  # Very low minimum area for high sensitivity
-                    valid_contours.append((contour, area))
-            
-            if not valid_contours:
-                return None
-            
-            # Use the largest contour or the one with best properties
-            best_contour = None
-            best_score = 0
-            
-            for contour, area in valid_contours:
-                # Calculate a score based on area and compactness
-                perimeter = cv2.arcLength(contour, True)
-                if perimeter > 0:
-                    compactness = 4 * np.pi * area / (perimeter * perimeter)
-                    score = area * compactness  # Favor larger, more compact regions
-                    if score > best_score:
-                        best_score = score
-                        best_contour = contour
-            
-            if best_contour is None:
-                best_contour = max(valid_contours, key=lambda x: x[1])[0]
-            
-            # Calculate centroid
-            moments = cv2.moments(best_contour)
-            if moments["m00"] > 0:
-                cx = moments["m10"] / moments["m00"]
-                cy = moments["m01"] / moments["m00"]
-                return (cx, cy)
-            
-            return None
-            
-        except Exception as e:
-            return None
-    
-    def _detect_shot_frame_difference_single(self, frame: np.ndarray, mask: np.ndarray, 
-                                           previous_frame: np.ndarray) -> Optional[Tuple[float, float]]:
-        """
-        Single frame detection for frame difference strategy (for compatibility with existing interface)
-        This is a simplified version for use in the standard detection loop
-        """
-        try:
-            if previous_frame is None:
-                return None
-            
-            # Calculate frame difference
-            frame_diff = cv2.absdiff(frame, previous_frame)
-            gray_diff = cv2.cvtColor(frame_diff, cv2.COLOR_BGR2GRAY)
-            
-            # Apply mask
-            masked_diff = cv2.bitwise_and(gray_diff, mask)
-            
-            # Check if there's significant change
-            mean_intensity = np.mean(masked_diff)
-            max_intensity = np.max(masked_diff)
-            
-            if mean_intensity < 8 or max_intensity < 20:
-                return None
-            
-            # Find shot position
-            return self._find_shot_position_in_difference(frame, previous_frame, mask, mean_intensity * 0.5)
-            
-        except Exception as e:
             return None 
