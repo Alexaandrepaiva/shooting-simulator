@@ -4,7 +4,7 @@ import logging
 from PIL import Image
 from .base import View
 from utils.spinner import ButtonStateManager
-
+from views.components.circular_progress_indicator import CircularProgressIndicator
 
 class StartingMenuView(View):
     """Starting menu view with background image and navigation buttons"""
@@ -86,6 +86,9 @@ class StartingMenuView(View):
             command=self.on_manual_click
         )
         self.manual_button.place(relx=0.75, rely=0.75, anchor="center")
+        
+        self.progress = CircularProgressIndicator(self.frame, size=50, arc_length=90)
+        self.progress.place(relx=0.79, rely=0.6, anchor="center")
         
         # Add buttons to state manager
         self.button_state_manager.add_button("iniciar", self.iniciar_button)
