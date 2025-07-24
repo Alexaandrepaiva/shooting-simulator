@@ -1,113 +1,113 @@
 {
-  "analysis_timestamp": "2025-07-24T12:54:17.838678",
+  "analysis_timestamp": "2025-07-24T13:10:03.497869",
   "total_shots": 7,
   "targets": [
     {
       "target_number": 1,
       "shots": [
         {
-          "timestamp": "2025-07-24T12:54:17.831925",
+          "timestamp": "2025-07-24T13:10:03.493760",
           "shot_number": 1,
           "absolute_position": {
-            "x": 372.65359477124184,
-            "y": 193.47821350762527
+            "x": 297.74536461927767,
+            "y": 154.10170232344143
           },
           "detection_strategy": "hsv_direct",
-          "frame_number": 87,
+          "frame_number": 22,
           "laser_info": {
-            "duration_frames": 3,
-            "first_seen": 87,
-            "last_seen": 89
+            "duration_frames": 4,
+            "first_seen": 22,
+            "last_seen": 25
           }
         },
         {
-          "timestamp": "2025-07-24T12:54:17.831945",
+          "timestamp": "2025-07-24T13:10:03.493772",
           "shot_number": 2,
           "absolute_position": {
-            "x": 354.4134259050284,
-            "y": 174.8620658233276
+            "x": 298.0,
+            "y": 153.39393939393938
           },
           "detection_strategy": "hsv_direct",
-          "frame_number": 110,
+          "frame_number": 27,
           "laser_info": {
-            "duration_frames": 4,
-            "first_seen": 110,
-            "last_seen": 113
+            "duration_frames": 1,
+            "first_seen": 27,
+            "last_seen": 27
           }
         },
         {
-          "timestamp": "2025-07-24T12:54:17.831950",
+          "timestamp": "2025-07-24T13:10:03.493775",
           "shot_number": 3,
           "absolute_position": {
-            "x": 362.23830409356725,
-            "y": 157.1833983105913
+            "x": 296.6313725490196,
+            "y": 151.47450980392156
           },
           "detection_strategy": "hsv_direct",
-          "frame_number": 131,
+          "frame_number": 51,
           "laser_info": {
-            "duration_frames": 4,
-            "first_seen": 131,
-            "last_seen": 134
+            "duration_frames": 1,
+            "first_seen": 51,
+            "last_seen": 51
           }
         },
         {
-          "timestamp": "2025-07-24T12:54:17.831954",
+          "timestamp": "2025-07-24T13:10:03.493779",
           "shot_number": 4,
           "absolute_position": {
-            "x": 325.9357447363264,
-            "y": 153.17677906499605
+            "x": 299.2058823529412,
+            "y": 148.95588235294116
           },
           "detection_strategy": "hsv_direct",
-          "frame_number": 152,
+          "frame_number": 79,
           "laser_info": {
-            "duration_frames": 6,
-            "first_seen": 152,
-            "last_seen": 157
+            "duration_frames": 2,
+            "first_seen": 79,
+            "last_seen": 80
           }
         },
         {
-          "timestamp": "2025-07-24T12:54:17.831961",
+          "timestamp": "2025-07-24T13:10:03.493781",
           "shot_number": 5,
           "absolute_position": {
-            "x": 358.10976370886857,
-            "y": 137.16709053473758
+            "x": 296.5,
+            "y": 148.0
           },
           "detection_strategy": "hsv_direct",
-          "frame_number": 171,
+          "frame_number": 111,
           "laser_info": {
-            "duration_frames": 6,
-            "first_seen": 171,
-            "last_seen": 176
+            "duration_frames": 1,
+            "first_seen": 111,
+            "last_seen": 111
           }
         },
         {
-          "timestamp": "2025-07-24T12:54:17.831964",
+          "timestamp": "2025-07-24T13:10:03.493784",
           "shot_number": 6,
           "absolute_position": {
-            "x": 337.11537508570916,
-            "y": 214.39145962994775
+            "x": 295.4313725490196,
+            "y": 148.43137254901958
           },
           "detection_strategy": "hsv_direct",
-          "frame_number": 203,
+          "frame_number": 114,
           "laser_info": {
-            "duration_frames": 5,
-            "first_seen": 203,
-            "last_seen": 207
+            "duration_frames": 1,
+            "first_seen": 114,
+            "last_seen": 114
           }
         },
         {
-          "timestamp": "2025-07-24T12:54:17.831967",
+          "timestamp": "2025-07-24T13:10:03.493787",
           "shot_number": 7,
           "absolute_position": {
-            "x": 364.5897058823529,
-            "y": 172.07469654528478
+            "x": 296.75,
+            "y": 148.5
           },
           "detection_strategy": "hsv_direct",
-          "frame_number": 223,
+          "frame_number": 141,
           "laser_info": {
-            "duration_frames": 4,
-            "first_seen": 223,
-            "last_seen": 226
+            "duration_frames": 2,
+            "first_seen": 141,
+            "last_seen": 142
           }
         }
       ]
