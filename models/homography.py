@@ -76,9 +76,17 @@ class HomographyModel:
                     # Convert to numpy array (camera coordinates - source points)
                     camera_points = np.float32(target_blobs)
                     
+                    # Order the camera points to match alvobase corners
+                    # We need to sort the 4 blob positions to correspond to:
+                    # [0] -> top-left (0, 0)
+                    # [1] -> top-right (width, 0)  
+                    # [2] -> bottom-right (width, height)
+                    # [3] -> bottom-left (0, height)
+                    ordered_camera_points = self._order_camera_points(camera_points)
+                    
                     # Calculate homography: camera coordinates -> alvobase coordinates
                     homography_matrix, mask = cv2.findHomography(
-                        camera_points, 
+                        ordered_camera_points, 
                         alvobase_corners, 
                         cv2.RANSAC
                     )
@@ -86,7 +94,7 @@ class HomographyModel:
                     if homography_matrix is not None:
                         # Store homography (convert to list for JSON serialization)
                         homographies_data["homographies"][str(target_num)] = {
-                            "camera_points": target_blobs,  # Original blob positions in camera frame
+                            "camera_points": ordered_camera_points.tolist(),  # Store ordered positions
                             "alvobase_corners": alvobase_corners.tolist(),
                             "homography_matrix": homography_matrix.tolist()
                         }
@@ -95,7 +103,8 @@ class HomographyModel:
                         self.homographies[target_num] = homography_matrix
                         
                         logging.info(f"Calculated homography for target {target_num}")
-                        logging.info(f"  Camera points: {target_blobs}")
+                        logging.info(f"  Original camera points: {target_blobs}")
+                        logging.info(f"  Ordered camera points: {ordered_camera_points.tolist()}")
                         
                     else:
                         logging.error(f"Failed to calculate homography for target {target_num}")
@@ -199,3 +208,51 @@ class HomographyModel:
     def has_homography_for_target(self, target_number: int) -> bool:
         """Check if homography exists for a target"""
         return target_number in self.homographies 
+
+    def _order_camera_points(self, camera_points: np.ndarray) -> np.ndarray:
+        """
+        Order the 4 camera points to match alvobase corners
+        
+        Args:
+            camera_points: 4x2 array of camera coordinates
+            
+        Returns:
+            np.ndarray: Ordered points [top-left, top-right, bottom-right, bottom-left]
+        """
+        try:
+            # Convert to list of points for easier handling
+            points = camera_points.tolist()
+            
+            # Sort points by y-coordinate first (top vs bottom)
+            points_sorted_by_y = sorted(points, key=lambda p: p[1])
+            
+            # Get top 2 points (smaller y values) and bottom 2 points (larger y values)
+            top_points = points_sorted_by_y[:2]
+            bottom_points = points_sorted_by_y[2:]
+            
+            # Sort top points by x-coordinate (left vs right)
+            top_points_sorted = sorted(top_points, key=lambda p: p[0])
+            top_left = top_points_sorted[0]    # smallest x among top points
+            top_right = top_points_sorted[1]   # largest x among top points
+            
+            # Sort bottom points by x-coordinate (left vs right)  
+            bottom_points_sorted = sorted(bottom_points, key=lambda p: p[0])
+            bottom_left = bottom_points_sorted[0]   # smallest x among bottom points
+            bottom_right = bottom_points_sorted[1]  # largest x among bottom points
+            
+            # Return in the order expected by alvobase corners
+            ordered_points = np.float32([
+                top_left,      # [0] -> (0, 0) top-left
+                top_right,     # [1] -> (width, 0) top-right
+                bottom_right,  # [2] -> (width, height) bottom-right
+                bottom_left    # [3] -> (0, height) bottom-left
+            ])
+            
+            logging.debug(f"Ordered camera points: TL{top_left}, TR{top_right}, BR{bottom_right}, BL{bottom_left}")
+            
+            return ordered_points
+            
+        except Exception as e:
+            logging.error(f"Error ordering camera points: {e}")
+            # Return original points as fallback
+            return camera_points 

@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import logging
+import cv2
 from models.application import ApplicationModel
 from views.starting_menu import StartingMenuView
 from views.calibration import CalibrationView
@@ -18,6 +19,10 @@ class AppController:
         
         # Initialize models
         self.app_model = ApplicationModel()
+        
+        # Camera management - single shared instance
+        self.camera = None
+        self.is_camera_initialized = False
         
         # Configure GUI appearance
         ctk.set_appearance_mode("dark")
@@ -56,6 +61,53 @@ class AppController:
         self.navigate_to_starting_menu()
         
         logging.info("Application initialized successfully")
+        
+    def initialize_camera(self):
+        """Initialize the shared camera instance"""
+        if self.is_camera_initialized and self.camera and self.camera.isOpened():
+            return True
+            
+        try:
+            # Release existing camera if any
+            if self.camera:
+                self.camera.release()
+                
+            self.camera = cv2.VideoCapture(0)
+            if not self.camera.isOpened():
+                raise Exception("Could not open camera")
+                
+            # Set camera properties
+            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            self.camera.set(cv2.CAP_PROP_FPS, 30)
+            
+            self.is_camera_initialized = True
+            logging.info("Shared camera initialized successfully")
+            return True
+            
+        except Exception as e:
+            logging.error(f"Error initializing shared camera: {e}")
+            self.camera = None
+            self.is_camera_initialized = False
+            return False
+            
+    def get_camera(self):
+        """Get the shared camera instance, initializing if needed"""
+        if not self.is_camera_initialized:
+            self.initialize_camera()
+        return self.camera
+        
+    def is_camera_available(self):
+        """Check if the shared camera is available and working"""
+        return self.is_camera_initialized and self.camera and self.camera.isOpened()
+        
+    def release_camera(self):
+        """Release the shared camera instance"""
+        if self.camera:
+            self.camera.release()
+            self.camera = None
+            self.is_camera_initialized = False
+            logging.info("Shared camera released")
         
     def _on_window_configure(self, event):
         """Ensure window stays maximized"""
@@ -97,6 +149,10 @@ class AppController:
         self.current_view = self.calibration_view
         self.app_model.set_current_view("calibration")
         
+        # Initialize shared camera if needed
+        if not self.is_camera_available():
+            self.initialize_camera()
+        
         # Start calibration process
         self.calibration_controller.start_calibration()
         
@@ -110,6 +166,10 @@ class AppController:
         self.simulation_view.show()
         self.current_view = self.simulation_view
         self.app_model.set_current_view("simulation")
+        
+        # Initialize shared camera if needed
+        if not self.is_camera_available():
+            self.initialize_camera()
         
         # Start simulation process
         self.simulation_controller.start_simulation()
@@ -129,6 +189,11 @@ class AppController:
         # Clean up controllers
         if hasattr(self, 'calibration_controller'):
             self.calibration_controller.cleanup()
+        if hasattr(self, 'simulation_controller'):
+            self.simulation_controller.cleanup()
+            
+        # Release shared camera
+        self.release_camera()
             
         self.root.quit()
         

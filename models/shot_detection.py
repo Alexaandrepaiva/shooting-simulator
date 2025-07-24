@@ -324,24 +324,36 @@ class ShotDetectionModel:
         
     def _create_target_region_mask(self, frame: np.ndarray, blob_positions: List[List[float]]) -> np.ndarray:
         """
-        Create a mask for the target region defined by blob positions
+        Create a rectangular mask for the target region defined by blob positions
         
         Args:
             frame: Camera frame
             blob_positions: 4 blob positions defining the target corners
             
         Returns:
-            np.ndarray: Binary mask for the target region
+            np.ndarray: Binary mask for the rectangular target region
         """
         try:
             # Create mask with same dimensions as frame
             mask = np.zeros(frame.shape[:2], dtype=np.uint8)
             
-            # Convert blob positions to integer points
-            points = np.array(blob_positions, dtype=np.int32)
+            # Convert blob positions to numpy array
+            points = np.array(blob_positions, dtype=np.float32)
             
-            # Create polygon mask from blob positions
-            cv2.fillPoly(mask, [points], 255)
+            # Calculate bounding rectangle that covers all blob positions
+            min_x = int(np.min(points[:, 0]))
+            max_x = int(np.max(points[:, 0]))
+            min_y = int(np.min(points[:, 1]))
+            max_y = int(np.max(points[:, 1]))
+            
+            # Ensure coordinates are within frame bounds
+            min_x = max(0, min_x)
+            max_x = min(frame.shape[1] - 1, max_x)
+            min_y = max(0, min_y)
+            max_y = min(frame.shape[0] - 1, max_y)
+            
+            # Create rectangular mask covering the entire area between blobs
+            mask[min_y:max_y+1, min_x:max_x+1] = 255
             
             return mask
             

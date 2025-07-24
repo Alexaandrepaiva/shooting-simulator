@@ -17,8 +17,7 @@ class SimulationController:
         self.app_controller = app_controller
         self.view = None
         
-        # Camera and video feed
-        self.camera = None
+        # Camera access through app controller - no longer managed here
         self.is_camera_running = False
         self.camera_thread = None
         self.after_id = None
@@ -51,7 +50,10 @@ class SimulationController:
     def start_simulation(self):
         """Start the simulation (camera feed)"""
         try:
-            self._initialize_camera()
+            # Check if shared camera is available
+            if not self.app_controller.is_camera_available():
+                raise Exception("Shared camera not available")
+                
             self._start_camera_feed()
             logging.info("Simulation started successfully")
             
@@ -69,31 +71,9 @@ class SimulationController:
         # Stop camera feed
         self._stop_camera_feed()
         
-        # Release camera
-        if self.camera:
-            self.camera.release()
-            self.camera = None
-            
+        # Note: Camera is not released here - it's managed by AppController
         logging.info("Simulation stopped")
         
-    def _initialize_camera(self):
-        """Initialize the camera"""
-        try:
-            self.camera = cv2.VideoCapture(0)
-            if not self.camera.isOpened():
-                raise Exception("Could not open camera")
-                
-            # Set camera properties
-            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-            self.camera.set(cv2.CAP_PROP_FPS, self.fps)
-            
-            logging.info("Camera initialized successfully")
-            
-        except Exception as e:
-            logging.error(f"Error initializing camera: {e}")
-            raise
-            
     def _start_camera_feed(self):
         """Start the camera feed loop"""
         self.is_camera_running = True
@@ -114,11 +94,19 @@ class SimulationController:
             
     def _update_camera_frame(self):
         """Update camera frame and handle video recording"""
-        if not self.is_camera_running or not self.camera:
+        if not self.is_camera_running:
+            return
+            
+        # Get shared camera from app controller
+        camera = self.app_controller.get_camera()
+        if not camera:
+            # Schedule next update
+            if self.is_camera_running and self.view and self.view.parent:
+                self.after_id = self.view.parent.after(30, self._update_camera_frame)
             return
             
         try:
-            ret, frame = self.camera.read()
+            ret, frame = camera.read()
             if not ret:
                 # Schedule next update
                 if self.is_camera_running and self.view and self.view.parent:
@@ -152,7 +140,7 @@ class SimulationController:
             # Convert to PIL Image
             pil_image = Image.fromarray(rgb_frame)
             
-            # Resize to fit display area (adjust as needed)
+            # Resize to fit display area
             pil_image = pil_image.resize((640, 480), Image.Resampling.LANCZOS)
             
             # Create CTkImage
@@ -178,10 +166,11 @@ class SimulationController:
             filename = f"shooting_{timestamp}.mp4"
             self.video_filepath = os.path.join(self.video_save_directory, filename)
             
-            # Get frame dimensions from camera
-            if self.camera:
-                frame_width = int(self.camera.get(cv2.CAP_PROP_FRAME_WIDTH))
-                frame_height = int(self.camera.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            # Get frame dimensions from shared camera
+            camera = self.app_controller.get_camera()
+            if camera:
+                frame_width = int(camera.get(cv2.CAP_PROP_FRAME_WIDTH))
+                frame_height = int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT))
             else:
                 frame_width, frame_height = 640, 480
                 
