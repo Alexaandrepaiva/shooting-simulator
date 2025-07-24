@@ -92,6 +92,28 @@ class ShotDetectionModel:
                                progress_callback=None) -> List[Dict]:
         """Detect shots for a specific target using multiple strategies until one finds enough shots"""
         
+        logging.info(f"=== Processing Target {target_number} ===")
+        logging.info(f"Target {target_number} blob positions: {blob_positions}")
+        
+        # Validate blob positions for this target
+        if len(blob_positions) != 4:
+            logging.error(f"Target {target_number}: Expected 4 blob positions, got {len(blob_positions)}")
+            return []
+            
+        # Calculate target region bounds for validation
+        x_coords = [pos[0] for pos in blob_positions]
+        y_coords = [pos[1] for pos in blob_positions]
+        target_bounds = {
+            'min_x': min(x_coords),
+            'max_x': max(x_coords),
+            'min_y': min(y_coords),
+            'max_y': max(y_coords)
+        }
+        
+        logging.info(f"Target {target_number} region bounds: "
+                    f"X=[{target_bounds['min_x']:.1f}, {target_bounds['max_x']:.1f}], "
+                    f"Y=[{target_bounds['min_y']:.1f}, {target_bounds['max_y']:.1f}]")
+        
         # Open video
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
@@ -113,25 +135,28 @@ class ShotDetectionModel:
                 cap, target_number, blob_positions, strategy_name, shots_per_series, progress_callback, total_frames
             )
             
+            # Validate that detected shots are within the target region
+            validated_shots = self._validate_shots_in_target_region(detected_shots, target_bounds, target_number)
+            
             # Store results for this strategy
             strategy_results.append({
                 'strategy_name': strategy_name,
-                'shots_found': len(detected_shots),
-                'shots_data': detected_shots
+                'shots_found': len(validated_shots),
+                'shots_data': validated_shots
             })
             
-            logging.info(f"Target {target_number} - Strategy {strategy_name} found {len(detected_shots)} shots")
+            logging.info(f"Target {target_number} - Strategy {strategy_name} found {len(detected_shots)} shots, {len(validated_shots)} validated")
             
             # If this strategy found at least the expected number of shots, use it and stop
-            if len(detected_shots) >= shots_per_series:
-                logging.info(f"Target {target_number} - Strategy {strategy_name} found sufficient shots ({len(detected_shots)}>={shots_per_series}), using all {len(detected_shots)} shots")
+            if len(validated_shots) >= shots_per_series:
+                logging.info(f"Target {target_number} - Strategy {strategy_name} found sufficient shots ({len(validated_shots)}>={shots_per_series}), using all {len(validated_shots)} shots")
                 cap.release()
                 
                 # Update shot numbers to be sequential for all detected shots
-                for i, shot in enumerate(detected_shots):
+                for i, shot in enumerate(validated_shots):
                     shot['shot_number'] = i + 1
                 
-                return detected_shots
+                return validated_shots
         
         cap.release()
         
@@ -336,47 +361,56 @@ class ShotDetectionModel:
         
     def _create_target_region_mask(self, frame: np.ndarray, blob_positions: List[List[float]]) -> np.ndarray:
         """
-        Create a rectangular mask for the target region defined by blob positions
+        Create a mask for the target region based on blob positions
+        This creates a polygon mask using the exact blob positions rather than a bounding rectangle
         
         Args:
             frame: Camera frame
-            blob_positions: 4 blob positions defining the target corners
+            blob_positions: 4 blob positions defining the target corners (ordered)
             
         Returns:
-            np.ndarray: Binary mask for the rectangular target region
+            np.ndarray: Binary mask for the target region
         """
         try:
             # Create mask with same dimensions as frame
             mask = np.zeros(frame.shape[:2], dtype=np.uint8)
             
-            # Convert blob positions to numpy array
+            if len(blob_positions) != 4:
+                logging.error(f"Expected 4 blob positions, got {len(blob_positions)}")
+                return mask
+                
+            # Convert blob positions to numpy array and ensure integer coordinates
             points = np.array(blob_positions, dtype=np.float32)
             
-            # Calculate bounding rectangle that covers all blob positions
-            min_x = int(np.min(points[:, 0]))
-            max_x = int(np.max(points[:, 0]))
-            min_y = int(np.min(points[:, 1]))
-            max_y = int(np.max(points[:, 1]))
+            # Ensure points are within frame bounds
+            points[:, 0] = np.clip(points[:, 0], 0, frame.shape[1] - 1)
+            points[:, 1] = np.clip(points[:, 1], 0, frame.shape[0] - 1)
             
-            # Ensure coordinates are within frame bounds
-            min_x = max(0, min_x)
-            max_x = min(frame.shape[1] - 1, max_x)
-            min_y = max(0, min_y)
-            max_y = min(frame.shape[0] - 1, max_y)
+            # Convert to integer coordinates for cv2.fillPoly
+            points_int = points.astype(np.int32)
             
-            # Create rectangular mask covering the entire area between blobs
-            mask[min_y:max_y+1, min_x:max_x+1] = 255
+            # Create a polygon mask using the exact blob positions
+            # This ensures we only analyze the specific target area
+            cv2.fillPoly(mask, [points_int], 255)
+            
+            # Calculate mask area for logging
+            mask_area = cv2.countNonZero(mask)
+            total_area = frame.shape[0] * frame.shape[1]
+            coverage_percent = (mask_area / total_area) * 100
+            
+            logging.debug(f"Target region mask: {mask_area} pixels ({coverage_percent:.1f}% of frame)")
+            logging.debug(f"Target corners: {points_int.tolist()}")
             
             return mask
             
         except Exception as e:
             logging.error(f"Error creating target region mask: {e}")
-            # Return full frame mask as fallback
-            return np.ones(frame.shape[:2], dtype=np.uint8) * 255
+            # Return empty mask instead of full frame to avoid false detections
+            return np.zeros(frame.shape[:2], dtype=np.uint8)
             
     def _get_rgb_enhanced_mask(self, frame: np.ndarray, mask: np.ndarray, 
                              previous_frame: Optional[np.ndarray]) -> Optional[np.ndarray]:
-        """Enhanced RGB detection mask for 650nm red laser"""
+        """Enhanced RGB detection mask for 650nm red laser - improved sensitivity"""
         try:
             if previous_frame is None:
                 return None
@@ -386,24 +420,65 @@ class ShotDetectionModel:
             gray_diff = cv2.cvtColor(frame_diff, cv2.COLOR_BGR2GRAY)
             red_diff = cv2.absdiff(frame[:, :, 2], previous_frame[:, :, 2])
             
-            # Check for sufficient movement
+            # Much more relaxed movement thresholds for better sensitivity
             mean_gray_diff = np.mean(gray_diff)
             mean_red_diff = np.mean(red_diff)
             red_ratio = mean_red_diff / (mean_gray_diff + 1e-6)
             
-            if mean_gray_diff < 1.0 or red_ratio < 0.9:
+            # Relaxed thresholds - allow very subtle changes
+            if mean_gray_diff < 0.3 or red_ratio < 0.4:
                 return None
                 
-            # Apply thresholds
-            _, red_thresh_conservative = cv2.threshold(red_diff, 5, 255, cv2.THRESH_BINARY)
-            _, red_thresh_aggressive = cv2.threshold(red_diff, 15, 255, cv2.THRESH_BINARY)
+            # Apply much lower and more sensitive thresholds
+            _, red_thresh_conservative = cv2.threshold(red_diff, 1, 255, cv2.THRESH_BINARY)
+            _, red_thresh_moderate = cv2.threshold(red_diff, 3, 255, cv2.THRESH_BINARY)
+            _, red_thresh_aggressive = cv2.threshold(red_diff, 8, 255, cv2.THRESH_BINARY)
             
-            # Choose appropriate threshold
-            test_mask = cv2.bitwise_and(red_thresh_aggressive, mask)
-            if cv2.countNonZero(test_mask) > 1:
-                final_mask = test_mask
-            else:
-                final_mask = cv2.bitwise_and(red_thresh_conservative, mask)
+            # Add red color validation from current frame
+            current_red = frame[:, :, 2]
+            current_green = frame[:, :, 1]
+            current_blue = frame[:, :, 0]
+            
+            # Create red dominance mask with relaxed criteria
+            red_dominant = (current_red > current_green * 0.8) & (current_red > current_blue * 0.8)
+            red_intense = current_red > 20  # Very low intensity threshold
+            red_color_mask = (red_dominant & red_intense).astype(np.uint8) * 255
+            
+            # Try different threshold combinations, starting with most conservative
+            test_masks = [
+                cv2.bitwise_and(red_thresh_conservative, mask),
+                cv2.bitwise_and(red_thresh_moderate, mask),
+                cv2.bitwise_and(red_thresh_aggressive, mask)
+            ]
+            
+            final_mask = None
+            for test_mask in test_masks:
+                # Combine with red color validation
+                combined_mask = cv2.bitwise_and(test_mask, red_color_mask)
+                
+                # Apply morphological operations to clean up noise
+                kernel = np.ones((2, 2), np.uint8)
+                cleaned_mask = cv2.morphologyEx(combined_mask, cv2.MORPH_OPEN, kernel)
+                cleaned_mask = cv2.morphologyEx(cleaned_mask, cv2.MORPH_CLOSE, kernel)
+                
+                # Apply final target mask
+                final_candidate = cv2.bitwise_and(cleaned_mask, mask)
+                
+                # Check if we found any pixels
+                if cv2.countNonZero(final_candidate) >= 1:
+                    final_mask = final_candidate
+                    break
+            
+            # If no mask worked with color validation, try without it (fallback)
+            if final_mask is None:
+                for test_mask in test_masks:
+                    # Apply morphological operations
+                    kernel = np.ones((2, 2), np.uint8)
+                    cleaned_mask = cv2.morphologyEx(test_mask, cv2.MORPH_OPEN, kernel)
+                    
+                    if cv2.countNonZero(cleaned_mask) >= 1:
+                        final_mask = cleaned_mask
+                        break
                 
             return final_mask
             
@@ -663,3 +738,34 @@ class ShotDetectionModel:
         except Exception as e:
             logging.error(f"Error saving detection data to JSON: {e}")
             return None 
+
+    def _validate_shots_in_target_region(self, shots: List[Dict], target_bounds: Dict, target_number: int) -> List[Dict]:
+        """
+        Validate that detected shots are within the target region bounds
+        
+        Args:
+            shots: List of detected shots
+            target_bounds: Target region bounds {min_x, max_x, min_y, max_y}
+            target_number: Target number for logging
+            
+        Returns:
+            List of validated shots within the target region
+        """
+        validated_shots = []
+        
+        for shot in shots:
+            shot_x = shot['absolute_position']['x']
+            shot_y = shot['absolute_position']['y']
+            
+            # Check if shot is within target bounds (with small tolerance)
+            tolerance = 20  # pixels
+            in_x_bounds = (target_bounds['min_x'] - tolerance <= shot_x <= target_bounds['max_x'] + tolerance)
+            in_y_bounds = (target_bounds['min_y'] - tolerance <= shot_y <= target_bounds['max_y'] + tolerance)
+            
+            if in_x_bounds and in_y_bounds:
+                validated_shots.append(shot)
+                logging.debug(f"Target {target_number} - Shot at ({shot_x:.1f}, {shot_y:.1f}) validated")
+            else:
+                logging.warning(f"Target {target_number} - Shot at ({shot_x:.1f}, {shot_y:.1f}) outside target region, discarded")
+                
+        return validated_shots 
