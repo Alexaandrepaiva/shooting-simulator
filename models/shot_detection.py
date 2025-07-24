@@ -90,7 +90,7 @@ class ShotDetectionModel:
     def _detect_shots_for_target(self, video_path: str, target_number: int, 
                                blob_positions: List[List[float]], shots_per_series: int,
                                progress_callback=None) -> List[Dict]:
-        """Detect shots for a specific target using multiple strategies and pick the best result"""
+        """Detect shots for a specific target using multiple strategies until one finds enough shots"""
         
         # Open video
         cap = cv2.VideoCapture(video_path)
@@ -99,11 +99,11 @@ class ShotDetectionModel:
             
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         
-        # Try ALL strategies and collect results
+        # Try strategies until one finds enough shots or all are exhausted
         strategy_results = []
         
         for strategy_idx, strategy_name in enumerate(self.strategies):
-            logging.info(f"Analysing target {target_number} strategy {strategy_idx + 1}/{len(self.strategies)}: {strategy_name}")
+            logging.info(f"Target {target_number} - Using strategy {strategy_idx + 1}/{len(self.strategies)}: {strategy_name}")
             
             # Reset video position for each strategy
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
@@ -120,33 +120,39 @@ class ShotDetectionModel:
                 'shots_data': detected_shots
             })
             
-            logging.info(f"Strategy {strategy_name}: found {len(detected_shots)} shots")
+            logging.info(f"Target {target_number} - Strategy {strategy_name} found {len(detected_shots)} shots")
+            
+            # If this strategy found at least the expected number of shots, use it and stop
+            if len(detected_shots) >= shots_per_series:
+                logging.info(f"Target {target_number} - Strategy {strategy_name} found sufficient shots ({len(detected_shots)}>={shots_per_series}), using all {len(detected_shots)} shots")
+                cap.release()
+                
+                # Update shot numbers to be sequential for all detected shots
+                for i, shot in enumerate(detected_shots):
+                    shot['shot_number'] = i + 1
+                
+                return detected_shots
         
         cap.release()
         
-        # Find the strategy that found the most shots
+        # If no strategy found enough shots, use the one that found the most
         if not strategy_results:
-            logging.warning(f"No strategies returned any results for target {target_number}")
+            logging.warning(f"Target {target_number} - No strategies returned any results")
             return []
         
-        # Log results from all strategies
-        logging.info(f"Target {target_number} - Strategy comparison:")
+        # Log results from all strategies tried
+        logging.info(f"Target {target_number} - No strategy found enough shots. Strategy comparison:")
         for result in strategy_results:
             logging.info(f"  {result['strategy_name']}: {result['shots_found']} shots")
         
         best_strategy = max(strategy_results, key=lambda x: x['shots_found'])
         
-        logging.info(f"Target {target_number}: Selected '{best_strategy['strategy_name']}' as best strategy with {best_strategy['shots_found']} shots")
+        logging.info(f"Target {target_number} - Using best strategy '{best_strategy['strategy_name']}' with {best_strategy['shots_found']} shots (expected {shots_per_series})")
         
-        if best_strategy['shots_found'] < shots_per_series:
-            logging.warning(f"Target {target_number}: Best strategy found only {best_strategy['shots_found']}/{shots_per_series} expected shots")
-        else:
-            logging.info(f"Target {target_number}: Best strategy found {best_strategy['shots_found']} shots (expected {shots_per_series})")
+        # Use ALL shots from the best strategy
+        best_shots = best_strategy['shots_data']
         
-        # Return the best strategy results, but limit to shots_per_series for final output
-        best_shots = best_strategy['shots_data'][:shots_per_series]
-        
-        # Update shot numbers to be sequential (in case we're limiting the results)
+        # Update shot numbers to be sequential for all detected shots
         for i, shot in enumerate(best_shots):
             shot['shot_number'] = i + 1
             
@@ -197,7 +203,7 @@ class ShotDetectionModel:
                         # Transition: no_laser -> laser_present
                         current_state = "laser_present"
                         current_laser = LaserState(laser_position, frame_count)
-                        logging.debug(f"Laser started at frame {frame_count}: {laser_position}")
+                        # logging.debug(f"Laser started at frame {frame_count}: {laser_position}")
                         
                 elif current_state == "laser_present":
                     if laser_detected:
@@ -210,16 +216,16 @@ class ShotDetectionModel:
                         # Transition: laser_present -> no_laser
                         current_state = "no_laser"
                         completed_shots.append(current_laser)
-                        logging.info(f"Shot completed: laser from frame {current_laser.first_seen_frame} to {current_laser.last_seen_frame}")
+                        # logging.info(f"Shot completed: laser from frame {current_laser.first_seen_frame} to {current_laser.last_seen_frame}")
                         current_laser = None
                 
                 previous_frame = frame.copy()
                 frame_count += 1
                 
-                # Progress callback
-                if progress_callback and frame_count % 30 == 0:
-                    progress = (frame_count / total_frames) * 100
-                    progress_callback(progress)
+                # Progress callback - removed to reduce logging
+                # if progress_callback and frame_count % 30 == 0:
+                #     progress = (frame_count / total_frames) * 100
+                #     progress_callback(progress)
                     
         except Exception as e:
             logging.error(f"Error in strategy {strategy_name}: {e}")
@@ -227,7 +233,7 @@ class ShotDetectionModel:
         # Handle case where video ends while laser is still present
         if current_state == "laser_present" and current_laser is not None:
             completed_shots.append(current_laser)
-            logging.info(f"Final shot completed: laser from frame {current_laser.first_seen_frame} to {current_laser.last_seen_frame}")
+            # logging.info(f"Final shot completed: laser from frame {current_laser.first_seen_frame} to {current_laser.last_seen_frame}")
         
         # Convert completed laser states to shot data (return ALL detected shots, not limited to shots_per_series)
         for i, laser_state in enumerate(completed_shots):
@@ -253,7 +259,13 @@ class ShotDetectionModel:
             
             detected_shots.append(shot_data)
             
-        logging.info(f"Pure state machine detected {len(completed_shots)} laser events, returning {len(detected_shots)} shots")
+        # Log summary with shot positions
+        if detected_shots:
+            shot_positions = [f"({shot['absolute_position']['x']:.1f}, {shot['absolute_position']['y']:.1f})" for shot in detected_shots]
+            logging.info(f"Strategy {strategy_name} completed: {len(detected_shots)} shots at positions {', '.join(shot_positions)}")
+        else:
+            logging.info(f"Strategy {strategy_name} completed: 0 shots detected")
+            
         return detected_shots
         
     def _detect_all_laser_positions(self, frame: np.ndarray, previous_frame: np.ndarray, 
