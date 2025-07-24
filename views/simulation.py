@@ -121,7 +121,7 @@ class SimulationView(View):
         self.is_recording = is_recording
         if is_recording:
             self.recording_button.configure(
-                text="Terminar",
+                text="Encerrar",
                 fg_color="#e74c3c",  # Red
                 hover_color="#c0392b"
             )

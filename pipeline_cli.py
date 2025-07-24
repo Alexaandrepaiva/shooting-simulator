@@ -313,7 +313,8 @@ class PipelineCLI:
         This step:
         - Loads absolute shot positions from data/detection_data.json
         - Applies homography transformations to convert to alvobase coordinates  
-        - Saves target positions to data/results_data.json
+        - Calculates grouping circles (center and radius) for each target
+        - Saves target positions and grouping data to data/results_data.json
         
         Returns:
             bool: True if successful, False otherwise
@@ -356,18 +357,19 @@ class PipelineCLI:
 
     def generate_result_images(self):
         """
-        Generate result images with labeled shots (Step 3 of workflow)
+        Generate result images with labeled shots and grouping circles (Step 3 of workflow)
         
         This step:
         - Loads target positions from data/results_data.json
         - Uses alvobase image as base
         - Draws shots using target coordinates (alvobase coordinate system)
+        - Draws grouping circles with center point (blue) and radius line (green)
         - Saves labeled result images to output/ directory
         
         Returns:
             bool: True if successful, False otherwise
         """
-        logging.info("🖼️  STEP 3: Generating result images with labeled shots")
+        logging.info("🖼️  STEP 3: Generating result images with labeled shots and grouping circles")
         
         try:
             from models.results import ResultsModel
@@ -486,6 +488,15 @@ class PipelineCLI:
                 shots = target.get('shots', [])
                 logging.info(f"    Target {target_num}: {len(shots)} shots")
                 
+                # Display grouping circle information
+                grouping_circle = target.get('grouping_circle', {})
+                if grouping_circle.get('shot_count', 0) > 0:
+                    center_x = grouping_circle.get('center_x', 0)
+                    center_y = grouping_circle.get('center_y', 0)
+                    radius = grouping_circle.get('radius', 0)
+                    shot_count = grouping_circle.get('shot_count', 0)
+                    logging.info(f"      🎯 Grouping: center({center_x:.1f}, {center_y:.1f}), radius={radius:.1f}, shots={shot_count}")
+                
                 for shot in shots:
                     abs_pos = shot.get('absolute_position', {})
                     target_pos = shot.get('target_position', {})
@@ -499,6 +510,62 @@ class PipelineCLI:
             
         except Exception as e:
             logging.error(f"❌ Error viewing results data: {e}")
+            return {"exists": False, "error": str(e)}
+
+    def view_grouping_circles(self):
+        """
+        Display grouping circle information for all targets
+        
+        Returns:
+            dict: Grouping circles summary
+        """
+        logging.info("🎯 Viewing grouping circles...")
+        
+        try:
+            results_file = os.path.join("data", "results_data.json")
+            if not os.path.exists(results_file):
+                logging.error("❌ Results data not found")
+                return {"exists": False}
+            
+            with open(results_file, 'r') as f:
+                data = json.load(f)
+            
+            logging.info("✅ Grouping circles found!")
+            logging.info(f"  📅 Processing timestamp: {data.get('processing_timestamp', 'Unknown')}")
+            
+            targets = data.get('targets', [])
+            logging.info(f"  🎪 Targets: {len(targets)}")
+            
+            grouping_data = []
+            for target in targets:
+                target_num = target.get('target_number', 'Unknown')
+                grouping_circle = target.get('grouping_circle', {})
+                
+                if grouping_circle.get('shot_count', 0) > 0:
+                    center_x = grouping_circle.get('center_x', 0)
+                    center_y = grouping_circle.get('center_y', 0)
+                    radius = grouping_circle.get('radius', 0)
+                    shot_count = grouping_circle.get('shot_count', 0)
+                    
+                    logging.info(f"    🎯 Target {target_num}:")
+                    logging.info(f"      Center: ({center_x:.1f}, {center_y:.1f})")
+                    logging.info(f"      Radius: {radius:.1f}")
+                    logging.info(f"      Shots: {shot_count}")
+                    logging.info(f"      Precision: {'High' if radius < 50 else 'Medium' if radius < 100 else 'Low'}")
+                    
+                    grouping_data.append({
+                        "target": target_num,
+                        "center": [center_x, center_y],
+                        "radius": radius,
+                        "shots": shot_count
+                    })
+                else:
+                    logging.info(f"    ⚫ Target {target_num}: No grouping data")
+            
+            return {"exists": True, "groupings": grouping_data}
+            
+        except Exception as e:
+            logging.error(f"❌ Error viewing grouping circles: {e}")
             return {"exists": False, "error": str(e)}
 
     def status(self):
@@ -661,8 +728,8 @@ WORKFLOW STEPS:
   2. generate-homographies → calculates coordinate transformations  
   3. record → captures video footage
   4. analize-video → detects shots in camera coordinates
-  5. process-data → applies homography transformations  
-  6. generate-result-images → creates labeled result images
+  5. process-data → applies homography transformations + calculates grouping circles
+  6. generate-result-images → creates labeled result images with grouping circles
 
 EXAMPLES:
   python pipeline_cli.py status
@@ -670,6 +737,7 @@ EXAMPLES:
   python pipeline_cli.py analize-video Video/shooting_20241124_143022.mp4
   python pipeline_cli.py process-data
   python pipeline_cli.py generate-result-images
+  python pipeline_cli.py view-grouping-circles
         """
     )
     
@@ -681,6 +749,7 @@ EXAMPLES:
     subparsers.add_parser('check-homographies', help='Check homography data status')
     subparsers.add_parser('view-detection-data', help='Display detection data summary')
     subparsers.add_parser('view-results-data', help='Display results data summary')
+    subparsers.add_parser('view-grouping-circles', help='Display grouping circle information for all targets')
     
     # Workflow commands
     subparsers.add_parser('record', help='Record video from camera until Q key is pressed')
@@ -688,8 +757,8 @@ EXAMPLES:
     analyze_parser = subparsers.add_parser('analize-video', help='Analyze video file to detect laser shots (Step 1)')
     analyze_parser.add_argument('video_path', help='Path to the video file to analyze')
     
-    subparsers.add_parser('process-data', help='Process detection data with homography transformations (Step 2)')
-    subparsers.add_parser('generate-result-images', help='Generate result images with labeled shots (Step 3)')
+    subparsers.add_parser('process-data', help='Process detection data with homography transformations + grouping circles (Step 2)')
+    subparsers.add_parser('generate-result-images', help='Generate result images with labeled shots and grouping circles (Step 3)')
     
     # Utility commands
     subparsers.add_parser('generate-homographies', help='Generate/regenerate homographies from calibration data')
@@ -716,6 +785,8 @@ EXAMPLES:
         cli.view_detection_data()
     elif args.command == 'view-results-data':
         cli.view_results_data()
+    elif args.command == 'view-grouping-circles':
+        cli.view_grouping_circles()
     elif args.command == 'record':
         cli.record_video()
     elif args.command == 'analize-video':

@@ -98,10 +98,14 @@ class ResultsModel:
                         
                         logging.info(f"Shot {shot['shot_number']}: camera({absolute_pos['x']:.1f}, {absolute_pos['y']:.1f}) -> target({target_position['x']:.1f}, {target_position['y']:.1f})")
                     
+                    # Calculate grouping circle for this target
+                    grouping_circle = self._calculate_grouping_circle(processed_shots)
+                    
                     target_result = {
                         "target_number": target_number,
                         "blob_positions": target_blobs,
                         "target_bounds": target_bounds,
+                        "grouping_circle": grouping_circle,
                         "shots": processed_shots
                     }
                     
@@ -195,6 +199,69 @@ class ResultsModel:
             logging.error(f"Error calculating relative position: {e}")
             return {"relative_x": 0.5, "relative_y": 0.5, "offset_x": 0.0, "offset_y": 0.0}
             
+    def _calculate_grouping_circle(self, shots: List[Dict]) -> Dict[str, float]:
+        """
+        Calculate grouping circle center and radius for a target's shots
+        
+        Args:
+            shots: List of shots with target_position coordinates
+            
+        Returns:
+            Dict with center_x, center_y, radius, and shot_count
+        """
+        try:
+            if not shots:
+                return {
+                    "center_x": 0.0,
+                    "center_y": 0.0,
+                    "radius": 0.0,
+                    "shot_count": 0
+                }
+            
+            # Calculate center as average of all shot positions (using target coordinates)
+            total_x = 0.0
+            total_y = 0.0
+            shot_count = len(shots)
+            
+            for shot in shots:
+                target_pos = shot.get('target_position', {})
+                total_x += target_pos.get('x', 0.0)
+                total_y += target_pos.get('y', 0.0)
+            
+            center_x = total_x / shot_count
+            center_y = total_y / shot_count
+            
+            # Calculate radius as average distance from center to each shot
+            total_distance = 0.0
+            for shot in shots:
+                target_pos = shot.get('target_position', {})
+                shot_x = target_pos.get('x', 0.0)
+                shot_y = target_pos.get('y', 0.0)
+                
+                # Calculate distance from center to this shot
+                distance = ((shot_x - center_x) ** 2 + (shot_y - center_y) ** 2) ** 0.5
+                total_distance += distance
+            
+            radius = total_distance / shot_count if shot_count > 0 else 0.0
+            
+            logging.info(f"Grouping circle: center({center_x:.1f}, {center_y:.1f}), radius={radius:.1f}, shots={shot_count}")
+            
+            return {
+                "center_x": center_x,
+                "center_y": center_y,
+                "radius": radius,
+                "shot_count": shot_count
+            }
+            
+        except Exception as e:
+            logging.error(f"Error calculating grouping circle: {e}")
+            return {
+                "center_x": 0.0,
+                "center_y": 0.0,
+                "radius": 0.0,
+                "shot_count": 0
+            }
+            
     def save_results_data(self, results_data: Dict) -> bool:
         """
         Save results data to file
@@ -266,9 +333,8 @@ class ResultsModel:
             # Generate image for each target
             for target_data in results_data.get('targets', []):
                 target_number = target_data['target_number']
-                shots = target_data.get('shots', [])
                 
-                if self._create_target_result_image(target_number, shots, base_image):
+                if self._create_target_result_image(target_number, target_data, base_image):
                     success_count += 1
                     
             if success_count > 0:
@@ -282,14 +348,14 @@ class ResultsModel:
             logging.error(f"Error generating target images: {e}")
             return False
             
-    def _create_target_result_image(self, target_number: int, shots: List[Dict], 
+    def _create_target_result_image(self, target_number: int, target_data: Dict, 
                                   base_image: np.ndarray) -> bool:
         """
         Create result image for a specific target with labeled shots
         
         Args:
             target_number: Target number
-            shots: List of shots with relative positions
+            target_data: Full target data including shots and grouping circle
             base_image: Base alvobase image
             
         Returns:
@@ -301,7 +367,7 @@ class ResultsModel:
             img_height, img_width = result_image.shape[:2]
             
             # Draw shots on the image using relative positions
-            self._draw_shots_with_smart_labels(result_image, shots, img_width, img_height)
+            self._draw_shots_with_smart_labels(result_image, target_data, img_width, img_height)
             
             # Add target information - simplified title
             info_text = f"Alvo {target_number}"
@@ -330,14 +396,14 @@ class ResultsModel:
             logging.error(f"Error creating target result image: {e}")
             return False
             
-    def _draw_shots_with_smart_labels(self, result_image: np.ndarray, shots: List[Dict], 
+    def _draw_shots_with_smart_labels(self, result_image: np.ndarray, target_data: Dict, 
                                     img_width: int, img_height: int):
         """
         Draw shots with smart label positioning to avoid overlaps
         
         Args:
             result_image: Image to draw on (alvobase image)
-            shots: List of shots with target positions and relative positions
+            target_data: Full target data including shots and grouping circle
             img_width: Image width
             img_height: Image height
         """
@@ -347,7 +413,7 @@ class ResultsModel:
             valid_shots = []
             
             # First pass: Draw shots and collect their positions
-            for shot in shots:
+            for shot in target_data['shots']:
                 # Use target_position (alvobase coordinates) for drawing on alvobase image
                 target_pos = shot['target_position']
                 
@@ -374,6 +440,23 @@ class ResultsModel:
             # Second pass: Add labels with smart positioning
             for shot, shot_x, shot_y in valid_shots:
                 self._add_shot_label(result_image, shot, shot_x, shot_y, used_areas)
+            
+            # Add grouping circle
+            grouping_circle = target_data.get('grouping_circle', {})
+            center_x = grouping_circle.get('center_x', 0.0)
+            center_y = grouping_circle.get('center_y', 0.0)
+            radius = grouping_circle.get('radius', 0.0)
+            shot_count = grouping_circle.get('shot_count', 0)
+            
+            if radius > 0 and shot_count > 0:
+                # Draw center point in blue color (smaller than shot size)
+                center_point = (int(center_x), int(center_y))
+                cv2.circle(result_image, center_point, 3, (255, 0, 0), -1)  # Blue filled circle (smaller than shots)
+                
+                # Draw grouping circle with calculated radius (blue color)
+                cv2.circle(result_image, center_point, int(radius), (255, 0, 0), 2)  # Blue circle line
+                
+                logging.info(f"Drew grouping circle: center({center_x:.1f}, {center_y:.1f}), radius={radius:.1f}")
             
         except Exception as e:
             logging.error(f"Error drawing shots with labels: {e}")
