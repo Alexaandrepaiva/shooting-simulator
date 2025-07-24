@@ -15,19 +15,28 @@ class ResultsModel:
         
     def calculate_relative_positions(self, detection_data: Dict, calibration_data: Dict) -> Dict:
         """
-        Calculate relative positions of shots relative to target blob positions
+        Calculate relative positions of shots by applying homography transformations
         
         Args:
-            detection_data: Detection data with absolute shot positions
+            detection_data: Detection data with absolute shot positions in camera coordinates
             calibration_data: Calibration data with blob positions
             
         Returns:
-            Dict: Results data with relative positions
+            Dict: Results data with target positions and relative positions
         """
         try:
+            # Import homography model
+            from models.homography import HomographyModel
+            
             blob_positions = calibration_data['fixed_target_positions']
             parameters = calibration_data['parameters']
             number_of_targets = parameters.get('number_of_targets', 1)
+            
+            # Initialize homography model
+            homography_model = HomographyModel()
+            if not homography_model.load_homographies():
+                logging.error("Failed to load homographies for coordinate transformation")
+                return {}
             
             results_data = {
                 "processing_timestamp": datetime.now().isoformat(),
@@ -49,7 +58,7 @@ class ResultsModel:
                 if target_blob_end <= len(blob_positions):
                     target_blobs = blob_positions[target_blob_start:target_blob_end]
                     
-                    # Calculate target bounding box
+                    # Calculate target bounding box (for relative position calculation)
                     target_bounds = self._calculate_target_bounds(target_blobs)
                     
                     # Process shots for this target
@@ -57,7 +66,16 @@ class ResultsModel:
                     for shot in target_data.get('shots', []):
                         absolute_pos = shot['absolute_position']
                         
-                        # Calculate relative position within target bounds
+                        # Apply homography transformation to convert camera coordinates to alvobase coordinates
+                        camera_point = (absolute_pos['x'], absolute_pos['y'])
+                        target_point = homography_model.transform_camera_to_target(camera_point, target_number)
+                        
+                        target_position = {
+                            "x": target_point[0],
+                            "y": target_point[1]
+                        }
+                        
+                        # Calculate relative position within target bounds (for reference)
                         relative_pos = self._calculate_relative_position(
                             absolute_pos, target_bounds
                         )
@@ -65,8 +83,9 @@ class ResultsModel:
                         processed_shot = {
                             "timestamp": shot["timestamp"],
                             "shot_number": shot["shot_number"],
-                            "absolute_position": absolute_pos,
-                            "relative_position": relative_pos,
+                            "absolute_position": absolute_pos,  # Original camera coordinates
+                            "target_position": target_position,  # Transformed alvobase coordinates
+                            "relative_position": relative_pos,   # Relative position within blob bounds
                             "detection_strategy": shot["detection_strategy"],
                             "frame_number": shot["frame_number"]
                         }
@@ -76,6 +95,8 @@ class ResultsModel:
                             processed_shot["intensity_info"] = shot["intensity_info"]
                             
                         processed_shots.append(processed_shot)
+                        
+                        logging.info(f"Shot {shot['shot_number']}: camera({absolute_pos['x']:.1f}, {absolute_pos['y']:.1f}) -> target({target_position['x']:.1f}, {target_position['y']:.1f})")
                     
                     target_result = {
                         "target_number": target_number,
@@ -175,10 +196,17 @@ class ResultsModel:
             return {"relative_x": 0.5, "relative_y": 0.5, "offset_x": 0.0, "offset_y": 0.0}
             
     def save_results_data(self, results_data: Dict) -> bool:
-        """Save results data to JSON file"""
+        """
+        Save results data to file
+        
+        Args:
+            results_data: Results data to save
+            
+        Returns:
+            bool: True if successful, False otherwise
+        """
         try:
             os.makedirs("data", exist_ok=True)
-            
             with open(self.results_file, 'w') as f:
                 json.dump(results_data, f, indent=2)
                 
@@ -190,14 +218,23 @@ class ResultsModel:
             return False
             
     def load_results_data(self) -> Optional[Dict]:
-        """Load results data from JSON file"""
+        """
+        Load results data from file
+        
+        Returns:
+            Dict: Results data if successful, None otherwise
+        """
         try:
             if not os.path.exists(self.results_file):
+                logging.warning(f"Results file not found: {self.results_file}")
                 return None
                 
             with open(self.results_file, 'r') as f:
-                return json.load(f)
+                results_data = json.load(f)
                 
+            logging.info(f"Loaded results data from: {self.results_file}")
+            return results_data
+            
         except Exception as e:
             logging.error(f"Error loading results data: {e}")
             return None
@@ -299,8 +336,8 @@ class ResultsModel:
         Draw shots with smart label positioning to avoid overlaps
         
         Args:
-            result_image: Image to draw on
-            shots: List of shots with relative positions
+            result_image: Image to draw on (alvobase image)
+            shots: List of shots with target positions and relative positions
             img_width: Image width
             img_height: Image height
         """
@@ -311,11 +348,12 @@ class ResultsModel:
             
             # First pass: Draw shots and collect their positions
             for shot in shots:
-                relative_pos = shot['relative_position']
+                # Use target_position (alvobase coordinates) for drawing on alvobase image
+                target_pos = shot['target_position']
                 
-                # Convert relative position to image coordinates
-                shot_x = int(relative_pos['relative_x'] * img_width)
-                shot_y = int(relative_pos['relative_y'] * img_height)
+                # Target coordinates are already in alvobase coordinate system
+                shot_x = int(target_pos['x'])
+                shot_y = int(target_pos['y'])
                 
                 # Ensure shot is within image bounds
                 if 0 <= shot_x < img_width and 0 <= shot_y < img_height:
@@ -329,14 +367,14 @@ class ResultsModel:
                     
                     valid_shots.append((shot, shot_x, shot_y))
                     
-                    logging.info(f"Shot {shot['shot_number']}: relative({relative_pos['relative_x']:.3f}, {relative_pos['relative_y']:.3f}) -> image({shot_x}, {shot_y})")
+                    logging.info(f"Shot {shot['shot_number']}: target({target_pos['x']:.1f}, {target_pos['y']:.1f}) -> image({shot_x}, {shot_y})")
                 else:
                     logging.warning(f"Shot {shot['shot_number']} outside image bounds: ({shot_x}, {shot_y})")
             
-            # Second pass: Add labels with overlap avoidance
+            # Second pass: Add labels with smart positioning
             for shot, shot_x, shot_y in valid_shots:
                 self._add_shot_label(result_image, shot, shot_x, shot_y, used_areas)
-                
+            
         except Exception as e:
             logging.error(f"Error drawing shots with labels: {e}")
             

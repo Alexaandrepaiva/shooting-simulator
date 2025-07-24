@@ -18,8 +18,7 @@ class CalibrationController:
         self.calibration_model = CalibrationModel()
         self.homography_model = HomographyModel()
         
-        # Camera and detection variables
-        self.camera = None
+        # Camera access through app controller - no longer managed here
         self.is_running = False
         self.after_id = None
         
@@ -46,8 +45,9 @@ class CalibrationController:
             if self.view:
                 self.view.set_parameter_values(self.calibration_model.get_all_parameters())
             
-            # Initialize camera
-            self._initialize_camera()
+            # Check if shared camera is available
+            if not self.app_controller.is_camera_available():
+                raise Exception("Shared camera not available")
             
             # Start video capture loop
             self.is_running = True
@@ -70,30 +70,9 @@ class CalibrationController:
                 pass
             self.after_id = None
             
-        # Release camera
-        if self.camera:
-            self.camera.release()
-            self.camera = None
-            
+        # Note: Camera is not released here - it's managed by AppController
         logging.info("Calibration stopped")
         
-    def _initialize_camera(self):
-        """Initialize the camera"""
-        try:
-            self.camera = cv2.VideoCapture(0)
-            if not self.camera.isOpened():
-                raise Exception("Could not open camera")
-                
-            # Set camera properties
-            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-            
-            logging.info("Camera initialized successfully")
-            
-        except Exception as e:
-            logging.error(f"Error initializing camera: {e}")
-            raise
-            
     def _configure_detector_params(self):
         """Configure blob detector parameters"""
         # Filter by Area
@@ -117,11 +96,19 @@ class CalibrationController:
         
     def _update_frame(self):
         """Update video frame and detect blobs"""
-        if not self.is_running or not self.camera:
+        if not self.is_running:
+            return
+            
+        # Get shared camera from app controller
+        camera = self.app_controller.get_camera()
+        if not camera:
+            # Schedule next update
+            if self.is_running:
+                self.after_id = self.view.parent.after(30, self._update_frame)
             return
             
         try:
-            ret, frame = self.camera.read()
+            ret, frame = camera.read()
             if not ret:
                 self.after_id = self.view.parent.after(30, self._update_frame)
                 return
@@ -189,74 +176,91 @@ class CalibrationController:
         self._paint_blobs_green(result_frame)
         
         return result_frame
-        
+            
     def _optimize_frame(self, frame):
         """Optimize frame for blob detection"""
-        try:
-            # Convert to HSV for better color separation
-            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-            
-            # Apply CLAHE to V channel
-            clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-            h, s, v = cv2.split(hsv)
-            v = clahe.apply(v)
-            hsv = cv2.merge([h, s, v])
-            
-            # Convert back to BGR then to grayscale
-            enhanced = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
-            gray = cv2.cvtColor(enhanced, cv2.COLOR_BGR2GRAY)
-            
-            # Apply Gaussian blur
-            blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-            
-            return blurred
-            
-        except Exception as e:
-            logging.error(f"Error optimizing frame: {e}")
-            return cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            
+        # Convert to grayscale
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        
+        # Apply Gaussian blur
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        
+        return blurred
+        
     def _store_keypoints(self, keypoints):
-        """Store keypoints for recurrent detection"""
-        self.recent_blob_detections.append(keypoints)
-        if len(self.recent_blob_detections) > 10:
+        """Store keypoints for recurrent blob detection"""
+        current_points = [(kp.pt[0], kp.pt[1]) for kp in keypoints]
+        
+        # Add to recent detections
+        self.recent_blob_detections.append(current_points)
+        
+        # Keep only last 30 frames
+        if len(self.recent_blob_detections) > 30:
             self.recent_blob_detections.pop(0)
             
     def _find_recurrent_blobs(self):
-        """Find points that appear recurrently"""
+        """Find blobs that appear consistently across multiple frames"""
         all_points = []
-        for kps in self.recent_blob_detections:
-            for kp in kps:
-                all_points.append((int(kp.pt[0]), int(kp.pt[1])))
+        
+        for frame_points in self.recent_blob_detections:
+            all_points.extend(frame_points)
+            
         return all_points
         
     def _cluster_blobs(self, points, distance_threshold=10):
-        """Cluster nearby points"""
+        """Cluster nearby blob detections"""
+        if not points:
+            return []
+            
         clusters = []
-        for point in points:
-            found_cluster = False
-            for cluster in clusters:
-                for member_point in cluster[1]:
-                    if np.linalg.norm(np.array(point) - np.array(member_point)) < distance_threshold:
-                        cluster[1].append(point)
-                        found_cluster = True
+        points = list(points)
+        
+        while points:
+            # Start new cluster with first point
+            current_point = points.pop(0)
+            cluster = [current_point]
+            
+            # Find all points within threshold distance
+            i = 0
+            while i < len(points):
+                point = points[i]
+                
+                # Check if point is close to any point in current cluster
+                close_to_cluster = False
+                for cluster_point in cluster:
+                    distance = np.sqrt((point[0] - cluster_point[0])**2 + (point[1] - cluster_point[1])**2)
+                    if distance <= distance_threshold:
+                        close_to_cluster = True
                         break
-                if found_cluster:
-                    break
-            if not found_cluster:
-                clusters.append((point, [point]))
+                        
+                if close_to_cluster:
+                    cluster.append(points.pop(i))
+                else:
+                    i += 1
+                    
+            clusters.append((len(cluster), cluster))
+            
+        # Sort by cluster size (number of detections)
+        clusters.sort(key=lambda x: x[0], reverse=True)
+        
         return clusters
         
-    def _select_recurrent_blobs(self, clustered_points, expected_blobs):
-        """Select the most recurrent blobs - exactly expected_blobs count"""
-        sorted_clusters = sorted(clustered_points, key=lambda x: len(x[1]), reverse=True)
-        selected_clusters = sorted_clusters[:expected_blobs]
+    def _select_recurrent_blobs(self, clustered_points, max_blobs):
+        """Select the most recurrent blobs up to max_blobs"""
+        # Take clusters with most detections
+        selected_clusters = clustered_points[:max_blobs]
+        
+        # Filter clusters that have at least 5 detections
+        min_detections = 5
+        selected_clusters = [cluster for cluster in selected_clusters if cluster[0] >= min_detections]
+        
         return selected_clusters
         
     def _paint_blobs_green(self, frame):
         """Paint green circles on detected blob positions"""
-        for pos in self.fixed_target_positions:
-            pos_tuple = tuple(int(x) for x in pos)
-            cv2.circle(frame, pos_tuple, 12, (0, 200, 0), 2)
+        for position in self.fixed_target_positions:
+            center = (int(position[0]), int(position[1]))
+            cv2.circle(frame, center, 8, (0, 255, 0), 2)  # Green circle
             
     def _convert_frame_for_display(self, frame):
         """Convert OpenCV frame to CTkImage for display"""
