@@ -15,8 +15,8 @@ from datetime import datetime
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from controllers.video_analysis_controller import VideoAnalysisController
-from controllers.results_controller import ResultsController
+from controllers.analysis_controller import AnalysisController
+from utils.enhanced_video_recorder import EnhancedVideoRecorder
 
 
 class PipelineCLI:
@@ -40,12 +40,12 @@ class PipelineCLI:
     def record_video(self):
         """
         Record video from camera until 'q' key is pressed
-        Uses the same filename pattern as the app
+        Uses enhanced C++ recorder with fallback to OpenCV [[memory:4135206]]
         
         Returns:
             str: Path to recorded video file, or None if failed
         """
-        logging.info("Starting video recording... Press 'q' to stop recording")
+        logging.info("🎬 Starting enhanced video recording... Press 'q' to stop recording")
         
         try:
             # Initialize camera
@@ -65,69 +65,100 @@ class PipelineCLI:
             
             # Create output filename (same pattern as app)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"shooting_{timestamp}.mp4"
+            filename = f"shooting_{timestamp}.avi"
             output_path = os.path.join(self.video_save_directory, filename)
             
-            # Initialize video writer (same codec as app)
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            video_writer = cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height))
-            
-            if not video_writer.isOpened():
-                raise RuntimeError("Failed to initialize video writer")
+            # Initialize enhanced recorder
+            with EnhancedVideoRecorder() as recorder:
+                # Configure for high-quality recording to avoid frame loss
+                recorder.configure(
+                    width=frame_width,
+                    height=frame_height,
+                    fps=fps,
+                    bitrate=15000000,  # 15 Mbps for high quality
+                    format_type='MJPEG',
+                    use_hardware_acceleration=True
+                )
                 
-            logging.info(f"Recording to: {output_path}")
-            logging.info("Press 'q' to stop recording...")
-            
-            # Record video
-            start_time = datetime.now()
-            frames_recorded = 0
-            
-            while True:
-                ret, frame = camera.read()
-                if not ret:
-                    logging.warning("Failed to capture frame")
-                    continue
+                # Start enhanced recording
+                if not recorder.start_recording(output_path, camera):
+                    raise RuntimeError("Failed to start enhanced video recording")
                     
-                # Write frame
-                video_writer.write(frame)
-                frames_recorded += 1
+                logging.info(f"🎬 Recording to: {output_path}")
+                logging.info("Press 'q' to stop recording...")
                 
-                # Display frame for monitoring (optional)
-                cv2.imshow('Recording - Press Q to stop', frame)
+                # Record video with real-time monitoring
+                start_time = datetime.now()
+                last_stats_time = start_time
                 
-                # Check for 'q' key press to stop recording
-                key = cv2.waitKey(1) & 0xFF
-                if key == ord('q') or key == ord('Q'):
-                    logging.info("Stop recording requested by user")
-                    break
+                while True:
+                    # Display frame for monitoring
+                    ret, frame = camera.read()
+                    if ret:
+                        cv2.imshow('Enhanced Recording - Press Q to stop', frame)
+                        
+                        # For OpenCV fallback, manually record frame
+                        recorder.record_frame(frame)
                     
-                # Show progress every 5 seconds
-                elapsed = (datetime.now() - start_time).total_seconds()
-                if frames_recorded % (fps * 5) == 0 and frames_recorded > 0:
-                    logging.info(f"Recording... {elapsed:.1f} seconds elapsed")
+                    # Check for 'q' key press to stop recording
+                    key = cv2.waitKey(1) & 0xFF
+                    if key == ord('q') or key == ord('Q'):
+                        logging.info("Stop recording requested by user")
+                        break
+                        
+                    # Show progress every 5 seconds
+                    current_time = datetime.now()
+                    if (current_time - last_stats_time).total_seconds() >= 5.0:
+                        stats = recorder.get_recording_stats()
+                        elapsed = (current_time - start_time).total_seconds()
+                        
+                        frames_written = stats.get('frames_written', 0)
+                        frames_dropped = stats.get('frames_dropped', 0)
+                        avg_fps = stats.get('average_fps', 0)
+                        backend = stats.get('backend', 'unknown')
+                        
+                        logging.info(f"📊 Recording stats: {frames_written} frames, "
+                                   f"{frames_dropped} dropped, {avg_fps:.1f} FPS, "
+                                   f"{elapsed:.1f}s elapsed, backend: {backend}")
+                        last_stats_time = current_time
+                        
+                # Stop recording
+                if not recorder.stop_recording():
+                    logging.warning("Enhanced recorder reported stop issues")
                     
-            # Calculate final duration
-            final_duration = (datetime.now() - start_time).total_seconds()
-            
-            # Cleanup
-            video_writer.release()
-            camera.release()
-            cv2.destroyAllWindows()
-            
-            logging.info(f"Recording completed!")
-            logging.info(f"- File: {output_path}")
-            logging.info(f"- Frames: {frames_recorded}")
-            logging.info(f"- Duration: {final_duration:.2f} seconds")
-            logging.info(f"- Average FPS: {frames_recorded / final_duration:.2f}")
-            
-            return output_path
+                # Get final stats
+                final_stats = recorder.get_recording_stats()
+                final_duration = (datetime.now() - start_time).total_seconds()
+                
+                # Cleanup
+                camera.release()
+                cv2.destroyAllWindows()
+                
+                # Log final results
+                frames_written = final_stats.get('frames_written', 0)
+                frames_dropped = final_stats.get('frames_dropped', 0)
+                backend = final_stats.get('backend', 'unknown')
+                avg_fps = frames_written / final_duration if final_duration > 0 else 0
+                
+                logging.info(f"🎬 Enhanced recording completed!")
+                logging.info(f"- File: {output_path}")
+                logging.info(f"- Frames written: {frames_written}")
+                logging.info(f"- Frames dropped: {frames_dropped}")
+                logging.info(f"- Duration: {final_duration:.2f} seconds")
+                logging.info(f"- Average FPS: {avg_fps:.2f}")
+                logging.info(f"- Backend used: {backend}")
+                
+                if frames_dropped == 0:
+                    logging.info("✅ Perfect recording - no frames lost!")
+                elif frames_dropped > 0:
+                    logging.warning(f"⚠️ {frames_dropped} frames were dropped")
+                    
+                return output_path
             
         except Exception as e:
-            logging.error(f"Error during video recording: {e}")
+            logging.error(f"Error during enhanced video recording: {e}")
             # Cleanup on error
             try:
-                if 'video_writer' in locals():
-                    video_writer.release()
                 if 'camera' in locals():
                     camera.release()
                 cv2.destroyAllWindows()
@@ -278,7 +309,7 @@ class PipelineCLI:
                     return False
             
             # Initialize video analysis controller
-            analysis_controller = VideoAnalysisController()
+            analysis_controller = AnalysisController()
             
             # Analyze video (this will save to detection_data.json and then process with homography)
             success = False
@@ -338,11 +369,37 @@ class PipelineCLI:
                 logging.error("❌ Valid homography data required")
                 return False
             
-            # Initialize results controller
-            results_controller = ResultsController()
+            # Import required models for data processing
+            from models.calibration import CalibrationModel
+            from models.results import ResultsModel
             
-            # Process the data
-            success = results_controller.process_detection_data()
+            # Initialize models
+            calibration_model = CalibrationModel()
+            results_model = ResultsModel()
+            
+            # Load calibration data
+            if not calibration_model.load_calibration_data():
+                logging.error("❌ No calibration data found. Cannot process detection data.")
+                return False
+                
+            calibration_data = {
+                'parameters': calibration_model.get_all_parameters(),
+                'fixed_target_positions': calibration_model.get_blob_positions()
+            }
+            
+            # Load detection data
+            detection_data = self._load_detection_data()
+            if not detection_data:
+                logging.error("❌ No detection data found. Cannot process.")
+                return False
+                
+            # Process data to generate relative positions
+            results_data = results_model.calculate_relative_positions(
+                detection_data, calibration_data
+            )
+            
+            # Save results data
+            success = results_model.save_results_data(results_data)
             if success:
                 logging.info("✅ Data processing completed successfully!")
                 logging.info("📄 Results saved to: data/results_data.json")
@@ -715,6 +772,20 @@ class PipelineCLI:
             logging.info(f"✅ Analysis completed: {message}")
         else:
             logging.error(f"❌ Analysis failed: {message}")
+            
+    def _load_detection_data(self):
+        """Load detection data from JSON file"""
+        try:
+            detection_file = os.path.join("data", "detection_data.json")
+            if not os.path.exists(detection_file):
+                return None
+                
+            with open(detection_file, 'r') as f:
+                return json.load(f)
+                
+        except Exception as e:
+            logging.error(f"Error loading detection data: {e}")
+            return None
 
 
 def main():
@@ -734,7 +805,7 @@ WORKFLOW STEPS:
 EXAMPLES:
   python pipeline_cli.py status
   python pipeline_cli.py record
-  python pipeline_cli.py analize-video Video/shooting_20241124_143022.mp4
+  python pipeline_cli.py analize-video Video/shooting_20241124_143022.avi
   python pipeline_cli.py process-data
   python pipeline_cli.py generate-result-images
   python pipeline_cli.py view-grouping-circles

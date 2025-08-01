@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 import threading
 from datetime import datetime
@@ -7,7 +8,7 @@ from models.calibration import CalibrationModel
 from models.shot_detection import ShotDetectionModel
 
 
-class VideoAnalysisController:
+class AnalysisController:
     """Controller for analyzing recorded videos to detect laser shots"""
     
     def __init__(self):
@@ -81,24 +82,48 @@ class VideoAnalysisController:
             if detected_shots:
                 logging.info("Processing detection data and applying homography transformations...")
                 
-                # Import required controllers
-                from controllers.results_controller import ResultsController
+                # Import required models for data processing
+                from models.calibration import CalibrationModel
                 from models.results import ResultsModel
                 
-                # Initialize results controller
-                results_controller = ResultsController()
+                # Initialize models
+                calibration_model = CalibrationModel()
+                results_model = ResultsModel()
                 
-                # Process detection data to apply homography and get target positions
-                success = results_controller.process_detection_data()
-                if not success:
-                    logging.error("Failed to process detection data")
+                # Load calibration data
+                if not calibration_model.load_calibration_data():
+                    logging.error("No calibration data found. Cannot process detection data.")
                     if completion_callback:
-                        completion_callback(False, "Failed to process detection data")
+                        completion_callback(False, "No calibration data found")
+                    return
+                    
+                calibration_data = {
+                    'parameters': calibration_model.get_all_parameters(),
+                    'fixed_target_positions': calibration_model.get_blob_positions()
+                }
+                
+                # Load detection data
+                detection_data = self._load_detection_data()
+                if not detection_data:
+                    logging.error("No detection data found. Cannot process.")
+                    if completion_callback:
+                        completion_callback(False, "No detection data found")
+                    return
+                    
+                # Process data to generate relative positions
+                results_data = results_model.calculate_relative_positions(
+                    detection_data, calibration_data
+                )
+                
+                # Save results data
+                success = results_model.save_results_data(results_data)
+                if not success:
+                    logging.error("Failed to save results data")
+                    if completion_callback:
+                        completion_callback(False, "Failed to save results data")
                     return
                 
                 # Step 3: Generate result images using the processed results data
-                results_model = ResultsModel()
-                results_data = results_model.load_results_data()
                 if results_data:
                     image_success = results_model.generate_target_images(results_data)
                     if image_success:
@@ -131,4 +156,18 @@ class VideoAnalysisController:
             
     def is_analysis_running(self) -> bool:
         """Check if video analysis is currently running"""
-        return self.is_analyzing 
+        return self.is_analyzing
+        
+    def _load_detection_data(self):
+        """Load detection data from JSON file"""
+        try:
+            detection_file = os.path.join("data", "detection_data.json")
+            if not os.path.exists(detection_file):
+                return None
+                
+            with open(detection_file, 'r') as f:
+                return json.load(f)
+                
+        except Exception as e:
+            logging.error(f"Error loading detection data: {e}")
+            return None 

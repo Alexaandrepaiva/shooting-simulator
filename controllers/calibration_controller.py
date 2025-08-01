@@ -164,19 +164,29 @@ class CalibrationController:
         expected_blobs = number_of_targets * 4  # Exactly 4 blobs per target
         selected_clusters = self._select_recurrent_blobs(clustered_points, expected_blobs)
         
-        # Store positions for saving
-        self.fixed_target_positions = [np.mean(cluster[1], axis=0).tolist() for cluster in selected_clusters]
+        # Extract blob positions and group them by target
+        blob_positions = [np.mean(cluster[1], axis=0).tolist() for cluster in selected_clusters]
+        
+        # Group blobs into targets based on spatial proximity
+        if number_of_targets > 1 and len(blob_positions) >= expected_blobs:
+            self.fixed_target_positions = self._group_blobs_by_target(blob_positions, number_of_targets)
+        else:
+            self.fixed_target_positions = blob_positions
         
         # Log blob detection info
         if len(self.fixed_target_positions) > 0:
             logging.debug(f"Detecting {len(self.fixed_target_positions)} blobs for {number_of_targets} targets (expected: {expected_blobs})")
+            
+            # Validate target separation if multiple targets
+            if number_of_targets > 1:
+                self._validate_target_separation(self.fixed_target_positions, number_of_targets)
         
         # Draw green circles on detected blobs
         result_frame = frame.copy()
         self._paint_blobs_green(result_frame)
         
         return result_frame
-            
+        
     def _optimize_frame(self, frame):
         """Optimize frame for blob detection"""
         # Convert to grayscale
@@ -256,6 +266,180 @@ class CalibrationController:
         
         return selected_clusters
         
+    def _group_blobs_by_target(self, blob_positions, number_of_targets):
+        """
+        Group blob positions into targets based on spatial proximity
+        
+        Args:
+            blob_positions: List of all detected blob positions
+            number_of_targets: Number of targets to group blobs into
+            
+        Returns:
+            List of blob positions ordered by target (4 blobs per target)
+        """
+        try:
+            import scipy.cluster.hierarchy as sch
+            from scipy.spatial.distance import pdist, squareform
+            
+            if len(blob_positions) < number_of_targets * 4:
+                logging.warning(f"Not enough blobs for target grouping: {len(blob_positions)} < {number_of_targets * 4}")
+                return blob_positions
+            
+            # Calculate distance matrix between all blobs
+            positions_array = np.array(blob_positions)
+            distances = pdist(positions_array)
+            
+            # Perform hierarchical clustering to group blobs
+            linkage_matrix = sch.linkage(distances, method='ward')
+            cluster_labels = sch.fcluster(linkage_matrix, number_of_targets, criterion='maxclust')
+            
+            # Group blobs by cluster
+            target_groups = {}
+            for i, label in enumerate(cluster_labels):
+                if label not in target_groups:
+                    target_groups[label] = []
+                target_groups[label].append(blob_positions[i])
+            
+            # Sort target groups by their center x-coordinate (left to right)
+            sorted_targets = []
+            for label in sorted(target_groups.keys()):
+                group = target_groups[label]
+                if len(group) == 4:  # Only include complete target groups
+                    # Order the 4 blobs within each target (clockwise from top-left)
+                    ordered_group = self._order_target_blobs(group)
+                    sorted_targets.extend(ordered_group)
+                    logging.info(f"Target group {label}: {len(group)} blobs")
+                else:
+                    logging.warning(f"Target group {label} has {len(group)} blobs, expected 4")
+            
+            return sorted_targets
+            
+        except ImportError:
+            logging.warning("SciPy not available for clustering, using simple distance-based grouping")
+            return self._simple_target_grouping(blob_positions, number_of_targets)
+        except Exception as e:
+            logging.error(f"Error in blob grouping: {e}")
+            return blob_positions
+    
+    def _simple_target_grouping(self, blob_positions, number_of_targets):
+        """
+        Simple target grouping fallback method using distance-based clustering
+        """
+        try:
+            if number_of_targets != 2:
+                logging.warning("Simple grouping only supports 2 targets")
+                return blob_positions
+                
+            positions_array = np.array(blob_positions)
+            
+            # Split blobs into left and right groups based on x-coordinate
+            x_coords = positions_array[:, 0]
+            median_x = np.median(x_coords)
+            
+            left_blobs = []
+            right_blobs = []
+            
+            for pos in blob_positions:
+                if pos[0] < median_x:
+                    left_blobs.append(pos)
+                else:
+                    right_blobs.append(pos)
+            
+            # Ensure we have 4 blobs per target
+            if len(left_blobs) != 4 or len(right_blobs) != 4:
+                logging.warning(f"Simple grouping failed: left={len(left_blobs)}, right={len(right_blobs)}")
+                return blob_positions
+            
+            # Order blobs within each target and combine
+            ordered_left = self._order_target_blobs(left_blobs)
+            ordered_right = self._order_target_blobs(right_blobs)
+            
+            return ordered_left + ordered_right
+            
+        except Exception as e:
+            logging.error(f"Error in simple target grouping: {e}")
+            return blob_positions
+    
+    def _order_target_blobs(self, target_blobs):
+        """
+        Order 4 blobs for a single target (clockwise from top-left)
+        
+        Args:
+            target_blobs: List of 4 blob positions for one target
+            
+        Returns:
+            List of ordered blob positions [top-left, top-right, bottom-right, bottom-left]
+        """
+        if len(target_blobs) != 4:
+            return target_blobs
+            
+        # Sort by y-coordinate to get top and bottom pairs
+        sorted_by_y = sorted(target_blobs, key=lambda p: p[1])
+        top_blobs = sorted_by_y[:2]
+        bottom_blobs = sorted_by_y[2:]
+        
+        # Sort each pair by x-coordinate
+        top_blobs_sorted = sorted(top_blobs, key=lambda p: p[0])
+        bottom_blobs_sorted = sorted(bottom_blobs, key=lambda p: p[0])
+        
+        # Return in clockwise order: top-left, top-right, bottom-right, bottom-left
+        return [
+            top_blobs_sorted[0],      # top-left
+            top_blobs_sorted[1],      # top-right  
+            bottom_blobs_sorted[1],   # bottom-right
+            bottom_blobs_sorted[0]    # bottom-left
+        ]
+    
+    def _validate_target_separation(self, blob_positions, number_of_targets):
+        """
+        Validate that target regions are properly separated
+        
+        Args:
+            blob_positions: All blob positions
+            number_of_targets: Number of targets
+        """
+        try:
+            if number_of_targets < 2 or len(blob_positions) < number_of_targets * 4:
+                return
+                
+            # Calculate bounding boxes for each target
+            target_boxes = []
+            for target_idx in range(number_of_targets):
+                start_idx = target_idx * 4
+                end_idx = start_idx + 4
+                target_blobs = blob_positions[start_idx:end_idx]
+                
+                x_coords = [blob[0] for blob in target_blobs]
+                y_coords = [blob[1] for blob in target_blobs]
+                
+                box = {
+                    'min_x': min(x_coords),
+                    'max_x': max(x_coords),
+                    'min_y': min(y_coords),
+                    'max_y': max(y_coords)
+                }
+                target_boxes.append(box)
+            
+            # Check for overlaps between target boxes
+            overlap_found = False
+            for i in range(len(target_boxes)):
+                for j in range(i + 1, len(target_boxes)):
+                    box1, box2 = target_boxes[i], target_boxes[j]
+                    
+                    # Check for overlap
+                    x_overlap = not (box1['max_x'] < box2['min_x'] or box2['max_x'] < box1['min_x'])
+                    y_overlap = not (box1['max_y'] < box2['min_y'] or box2['max_y'] < box1['min_y'])
+                    
+                    if x_overlap and y_overlap:
+                        overlap_found = True
+                        logging.warning(f"Target {i+1} and Target {j+1} regions overlap!")
+                        
+            if not overlap_found:
+                logging.info("Target regions are properly separated")
+                
+        except Exception as e:
+            logging.error(f"Error validating target separation: {e}")
+            
     def _paint_blobs_green(self, frame):
         """Paint green circles on detected blob positions"""
         for position in self.fixed_target_positions:

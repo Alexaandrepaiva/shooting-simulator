@@ -5,7 +5,7 @@ from models.application import ApplicationModel
 from views.starting_menu import StartingMenuView
 from views.calibration import CalibrationView
 from views.simulation import SimulationView
-from controllers.menu_controller import MenuController
+from controllers.menu_controller import StartingMenuController
 from controllers.calibration_controller import CalibrationController
 from controllers.simulation_controller import SimulationController
 
@@ -40,17 +40,17 @@ class AppController:
         self.root.bind('<Configure>', self._on_window_configure)
         
         # Initialize controllers
-        self.menu_controller = MenuController(self)
+        self.starting_menu_controller = StartingMenuController(self)
         self.calibration_controller = CalibrationController(self)
         self.simulation_controller = SimulationController(self)
         
         # Initialize views
-        self.starting_menu_view = StartingMenuView(self.root, self.menu_controller)
+        self.starting_menu_view = StartingMenuView(self.root, self.starting_menu_controller)
         self.calibration_view = CalibrationView(self.root, self.calibration_controller)
         self.simulation_view = SimulationView(self.root, self.simulation_controller)
         
         # Set up controller-view relationships
-        self.menu_controller.set_view(self.starting_menu_view)
+        self.starting_menu_controller.set_view(self.starting_menu_view)
         self.calibration_controller.set_view(self.calibration_view)
         self.simulation_controller.set_view(self.simulation_view)
         
