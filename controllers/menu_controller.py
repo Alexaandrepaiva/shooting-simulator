@@ -4,7 +4,7 @@ import sys
 import logging
 
 
-class MenuController:
+class StartingMenuController:
     """Controller for the starting menu view"""
     
     def __init__(self, app_controller):
